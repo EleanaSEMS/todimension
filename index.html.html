@@ -1,0 +1,4708 @@
+<!DOCTYPE html>
+<html lang="en">
+  
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>ToDimension</title>
+  <link rel="icon" type="image/png" href="favicon.png" />
+  <link href="https://fonts.googleapis.com/css2?family=Caveat&family=Comic+Neue&family=Inter&family=Merriweather&family=Pacifico&display=swap" rel="stylesheet">
+  <script defer src="https://unpkg.com/mathlive"></script>
+
+  <style>
+    :root{
+      --bg:#f4f1f8;
+      --panel:rgba(255,255,255,.78);
+      --panel-strong:rgba(255,255,255,.92);
+      --text:#1f2330;
+      --muted:#667085;
+      --border:rgba(31,35,48,.10);
+      --shadow:0 18px 50px rgba(31,35,48,.10);
+      --accent:#8b7cf6;
+      --accent-2:#b7a6ff;
+      --danger:#ef6b7a;
+      --ok:#37b26c;
+      --radius:22px;
+    }
+ 
+    [data-mode="dark"]{
+      --bg:#0f1220;
+      --panel:rgba(21,26,45,.74);
+      --panel-strong:rgba(21,26,45,.94);
+      --text:#f3f5ff;
+      --muted:#a5adcb;
+      --border:rgba(255,255,255,.08);
+      --shadow:0 18px 50px rgba(0,0,0,.35);
+    }
+ 
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      font-family:"Segoe UI", system-ui, -apple-system, Arial, sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(139,124,246,.20), transparent 35%),
+        radial-gradient(circle at top right, rgba(183,166,255,.16), transparent 30%),
+        linear-gradient(180deg, var(--bg), var(--bg));
+      overflow-x:hidden;
+    }
+ 
+    .app{
+      min-height:100vh;
+      min-height:100dvh;
+      display:grid;
+      grid-template-columns:280px 1fr;
+      position:relative;
+      z-index:1;
+    }
+ 
+    .sidebar{
+      padding:18px;
+      border-right:1px solid var(--border);
+      background:rgba(255,255,255,.20);
+      backdrop-filter:blur(18px);
+      position:sticky;
+      top:0;
+      height:100vh;
+      height:100dvh;
+      display:flex;
+      flex-direction:column;
+      gap:16px;
+      width:min(280px,100%);
+      overflow-y:auto;
+    }
+ 
+    .brand, .profileCard, .panel, .weekCard, .miniCard, .goalItem, .statCard{
+      background:var(--panel);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+    }
+ 
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      padding:16px;
+    }
+ 
+    .brand-icon{
+      width:48px;height:48px;border-radius:16px;
+      display:grid;place-items:center;
+      background:linear-gradient(135deg,var(--accent),var(--accent-2));
+      color:#fff;
+      font-size:22px;
+      font-weight:800;
+      overflow:hidden;
+      flex:0 0 auto;
+    }
+    .brand-icon img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
+    }
+ 
+    .brand h1{ margin:0; font-size:18px; line-height:1.1; }
+    .brand p{ margin:3px 0 0; color:var(--muted); font-size:13px; }
+ 
+    .profileCard{
+      padding:16px;
+      display:flex;
+      gap:12px;
+      align-items:center;
+      transition: background 0.2s;
+    }
+
+    .profileCard:hover {
+      background: rgba(139,124,246, 0.05);
+    }
+ 
+    .pfp, .spritePreview{
+      object-fit:cover;
+      background:linear-gradient(135deg, rgba(139,124,246,.18), rgba(183,166,255,.30));
+      border:1px solid var(--border);
+    }
+ 
+    .pfp{
+      width:56px;height:56px;border-radius:18px;
+    }
+ 
+    .spritePreview{
+      width:92px;height:92px;border-radius:24px;
+      background:rgba(127,127,127,.12);
+    }
+ 
+    .profileText strong{ display:block; font-size:15px; }
+    .profileText span{ color:var(--muted); font-size:13px; }
+ 
+    .nav{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+    }
+ 
+    .nav a{
+      text-decoration:none;
+      color:var(--text);
+      padding:12px 14px;
+      border-radius:16px;
+      border:1px solid var(--border);
+      background:var(--panel);
+      box-shadow:0 6px 18px rgba(31,35,48,.05);
+      font-weight:600;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+    }
+ 
+    .nav a.active{
+      background:linear-gradient(135deg, rgba(139,124,246,.18), rgba(183,166,255,.20));
+      border-color:rgba(139,124,246,.35);
+    }
+ 
+    .sidebarFooter{
+      margin-top:auto;
+      display:grid;
+      gap:10px;
+    }
+ 
+    .btn{
+      appearance:none;
+      border:none;
+      border-radius:16px;
+      padding:12px 14px;
+      font-weight:700;
+      cursor:pointer;
+      color:#fff;
+      background:linear-gradient(135deg,var(--accent),var(--accent-2));
+      box-shadow:0 12px 28px rgba(139,124,246,.24);
+    }
+ 
+    .btn.secondary{
+      background:var(--panel);
+      color:var(--text);
+      border:1px solid var(--border);
+      box-shadow:none;
+    }
+ 
+    .btn.danger{
+      background:linear-gradient(135deg, #f16b7c, #f2a07e);
+    }
+ 
+    .main{
+      padding:22px;
+      min-width:0;
+      overflow-x: auto;
+    }
+ 
+    .topbar{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:16px;
+      margin-bottom:18px;
+    }
+ 
+    .hero{
+      width:100%;
+      padding:18px 20px;
+      border-radius:24px;
+      background:var(--panel);
+      border:1px solid var(--border);
+      box-shadow:var(--shadow);
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:18px;
+    }
+ 
+    .hero h2{ margin:0; font-size:24px; }
+    .hero p{ margin:6px 0 0; color:var(--muted); }
+ 
+    .view{
+      display:none;
+      margin-top:18px;
+    }
+ 
+    .view.active{ display:block; }
+ 
+    .grid2{
+      display:grid;
+      grid-template-columns:1.2fr .9fr;
+      gap:18px;
+    }
+
+    .week-layout-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      align-items: start;
+    }
+ 
+    .panel{
+      padding:18px;
+      min-width:0;
+    }
+ 
+    .sectionTitle{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      margin-bottom:14px;
+    }
+ 
+    .sectionTitle h3{ margin:0; font-size:18px; }
+    .muted{ color:var(--muted); font-size:13px; }
+ 
+    .weekGrid, .cardGrid, .goalList, .statGrid{
+      display:grid;
+      gap:12px;
+    }
+ 
+    .miniCard, .weekCard, .goalItem, .statCard{
+      background:var(--panel-strong);
+      border:1px solid var(--border);
+      border-radius:18px;
+      padding:14px;
+      box-shadow:0 8px 20px rgba(31,35,48,.06);
+    }
+ 
+    .weekCard.active, .miniCard.active{
+      outline:2px solid rgba(139,124,246,.32);
+    }
+ 
+    .weekHead, .cardHead{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      margin-bottom:10px;
+    }
+ 
+    .weekHead strong, .cardHead strong{ font-size:15px; }
+ 
+    .progress{
+      height:12px;
+      background:rgba(127,127,127,.15);
+      border-radius:999px;
+      overflow:hidden;
+      margin:10px 0 8px;
+    }
+ 
+    .progress > div{
+      height:100%;
+      width:0%;
+      background:linear-gradient(90deg,var(--accent),var(--accent-2));
+      border-radius:999px;
+      transition:width .25s ease;
+    }
+ 
+    .taskList, .list{
+      display:grid;
+      gap:8px;
+      margin-top:10px;
+    }
+ 
+    .taskItem{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      padding:10px 12px;
+      border-radius:14px;
+      background:rgba(255,255,255,.72);
+      border:1px solid var(--border);
+    }
+ 
+    .taskItem label{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      min-width:0;
+    }
+ 
+    .taskItem span{
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+    }
+ 
+    .iconBtn{
+      border:none;
+      background:transparent;
+      cursor:pointer;
+      color:var(--muted);
+      font-size:16px;
+      padding:6px 8px;
+      border-radius:10px;
+    }
+ 
+    .iconBtn:hover{
+      background:rgba(127,127,127,.12);
+    }
+ 
+    .toolbar{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:12px;
+    }
+ 
+    .input, select, textarea{
+      width:100%;
+      padding:12px 13px;
+      border-radius:14px;
+      border:1px solid var(--border);
+      background:var(--panel-strong);
+      color:var(--text);
+      outline:none;
+      font:inherit;
+    }
+ 
+    textarea{ min-height:92px; resize:vertical; }
+ 
+    .twoCol{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+    }
+
+    .task-input-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .task-input-row > input[type="text"], .task-input-row > input.input {
+      flex: 1;
+    }
+ 
+    .small{ font-size:12px; color:var(--muted); }
+ 
+    .colorRow{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+    }
+ 
+    .colorSwatch{
+      width:30px;
+      height:30px;
+      border-radius:999px;
+      border:2px solid rgba(255,255,255,.7);
+      box-shadow:0 2px 10px rgba(0,0,0,.08);
+      cursor:pointer;
+    }
+ 
+    .editorTitle{
+      margin:0 0 12px;
+      font-size:16px;
+    }
+ 
+    .previewBox{
+      border-radius:18px;
+      border:1px dashed var(--border);
+      padding:16px;
+      min-height:180px;
+      background:rgba(255,255,255,.5);
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+ 
+    .bubble{
+      align-self:flex-end !important; /* Fixed: forced to very right */
+      max-width:100%;
+      padding:12px 14px;
+      border-radius:18px 18px 18px 6px;
+      background:rgba(139,124,246,.12);
+      border:1px solid rgba(139,124,246,.2);
+      color:var(--text);
+      white-space:pre-wrap;
+    }
+ 
+    .achievementItem{
+      padding:14px;
+      border-radius:18px;
+      background:var(--panel-strong);
+      border:1px solid var(--border);
+    }
+ 
+    .achievementItem.locked{
+      opacity:.65;
+    }
+ 
+    .achievementTop{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:12px;
+      margin-bottom:8px;
+    }
+ 
+    .achievementTop strong{ font-size:15px; }
+
+    .weekScene{
+      position:relative;
+      display:grid;
+      grid-template-columns:1fr;
+      gap:18px;
+      align-items:stretch;
+    }
+ 
+    #weekView .weekScene{
+      grid-template-columns:1.35fr .85fr;
+      min-height:480px;
+    }
+ 
+    #weekView .companionStage,
+    #noteEditorView .noteCompanionStage{
+      position:fixed;
+      right:22px;
+      bottom:0px;
+      width:260px;
+      min-height:0;
+      padding:0;
+      border:none;
+      background:transparent;
+      box-shadow:none;
+      overflow:visible;
+      z-index:9999;
+      display:flex;
+      flex-direction:column;
+      align-items:flex-end;
+      justify-content:flex-end;
+      gap:12px;
+      pointer-events:none;
+    }
+ 
+    #weekView .companionDock,
+    #noteEditorView .noteCompanionDock{
+      position:relative;
+      width:100%;
+      display:flex;
+      flex-direction:column;
+      align-items:flex-end;
+      gap:12px;
+      padding:0;
+      pointer-events:none;
+    }
+ 
+    /* Stacks bubble STRUCTURALLY above the image instead of overlapping it */
+    #weekView #weekPageCharacterBubble,
+    #noteEditorView #notePageCharacterBubble{
+      position:relative;
+      width:auto;
+      max-width:88%;
+      background:#ffffff !important;
+      border:2px solid var(--accent);
+      box-shadow:0 6px 16px rgba(0,0,0,0.12);
+      opacity:1 !important;
+      margin: 0 0 0 auto !important; /* Force completely right */
+      padding:12px 14px;
+      border-radius:24px;
+      color:var(--text);
+      text-align:right;
+      white-space:pre-wrap;
+      pointer-events:none;
+      z-index:999999 !important;
+    }
+ 
+    #weekView #weekPageCharacterBubble::after,
+    #noteEditorView #notePageCharacterBubble::after{
+      content:'';
+      position:absolute;
+      right:24px;
+      bottom:-12px;
+      width:0;
+      height:0;
+      border-left:10px solid transparent;
+      border-right:10px solid transparent;
+      border-top:10px solid var(--accent);
+    }
+ 
+    #weekView #weekPageCharacterImg{
+      width:auto;
+      height:auto;
+      max-width:320px;
+      max-height:380px;
+      object-fit:contain;
+      border-radius:0;
+      box-shadow:none;
+      border:none;
+      background:transparent;
+    }
+
+    #noteEditorView #notePageCharacterImg{
+      width:auto;
+      height:auto;
+      max-width:130px !important;
+      max-height:160px !important;
+      object-fit:contain;
+      border-radius:0;
+      box-shadow:none;
+      border:none;
+      background:transparent;
+    }
+ 
+    #weekView .companionRow,
+    #noteEditorView .noteCompanionRow{
+      width:100%;
+      display:flex;
+      justify-content:flex-end;
+      align-items:flex-end;
+      gap:12px;
+      margin-top:auto;
+    }
+ 
+    .companionMeta{
+      text-align:right;
+      display:grid;
+      gap:3px;
+    }
+ 
+    .toast{
+      position:fixed;
+      left:50%;
+      bottom:18px;
+      transform:translateX(-50%);
+      background:rgba(21,26,45,.92);
+      color:#fff;
+      padding:12px 16px;
+      border-radius:999px;
+      box-shadow:var(--shadow);
+      display:none;
+      z-index:1000;
+    }
+ 
+    .hidden{ display:none !important; }
+ 
+    #confettiCanvas{
+      position:fixed;
+      inset:0;
+      pointer-events:none;
+      z-index:1000;
+    }
+
+    /* Keep tabs beside the main screen on all devices */
+    @media (max-width: 1024px) {
+        .app { grid-template-columns: 220px 1fr; }
+    }
+ 
+    @media (max-width: 768px) {
+      .app { 
+        display: flex;
+        flex-direction: column;
+        grid-template-columns: none; 
+      }
+      .sidebar {
+        position: relative;
+        width: 100%;
+        height: auto;
+        max-height: none;
+        padding: 12px;
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .nav {
+        flex-direction: row;
+        flex-wrap: wrap;
+        width: 100%;
+        gap: 6px;
+        margin-top: 10px;
+        justify-content: center;
+      }
+      .nav a {
+        padding: 6px 10px;
+        font-size: 12px;
+      }
+      .nav a span { display: none; }
+      .brand { width: auto; }
+      .brand-icon {
+        width: 36px; height: 36px; font-size: 16px;
+      }
+      .brand h1 { font-size: 15px; }
+      .profileCard { width: 100%; max-width: 250px; margin: 0 auto; }
+      .sidebarFooter { margin-top: 10px; width: 100%; display: flex; justify-content: center; }
+
+      .task-input-row { flex-wrap: wrap; }
+      .task-input-row > input[type="text"], .task-input-row > input.input { width: calc(100% - 55px); flex: none; }
+      .task-input-row > button { width: 100%; }
+
+      #noteContentEditor {
+        padding: 2em 1.5em 2em 40px !important;
+      }
+      .docsPageWrapper {
+        width: 100%;
+        min-height: 800px;
+      }
+      .companionStage, .noteCompanionStage {
+        transform: scale(0.85);
+        transform-origin: bottom right;
+      }
+      .custom-sticker.active-sticker .delete-handle,
+      .custom-sticker.selected-sticker .delete-handle {
+        display: grid !important;
+      }
+      #weekFloatingCalendar {
+        width: 95% !important;
+        right: 2.5% !important;
+      }
+    }
+    
+    @media (max-width: 500px) {
+      .grid2, .weekScene, .twoCol, .week-layout-grid{
+        grid-template-columns:1fr;
+      }
+    }
+
+#noteEditorView{
+  margin-top:18px !important;
+}
+
+#noteEditorView .docsApp{
+  min-height:auto !important;
+  display:flex !important;
+  flex-direction:column !important;
+  background:transparent !important;
+  border:none !important;
+  box-shadow:none !important;
+  overflow:visible !important;
+}
+
+#noteEditorView .docsTopbar{
+  position:sticky !important;
+  top:12px !important;
+  z-index:20 !important;
+  border-radius:18px !important;
+  box-shadow:0 14px 36px rgba(31,35,48,.08) !important;
+  height:64px !important;
+  display:flex !important;
+  align-items:center !important;
+  gap:10px !important;
+  padding:8px 14px !important;
+  background:#fff !important;
+  border-bottom:1px solid #e5e7eb !important;
+}
+
+#noteEditorView .docsTitleArea{
+  flex:1 !important;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+#noteEditorView .docsTitleInput{
+  width:100% !important;
+  border:none !important;
+  outline:none !important;
+  background:transparent !important;
+  font-size:18px !important;
+  font-weight:600 !important;
+  color:#202124 !important;
+}
+
+#noteEditorView .docsSubtitle{
+  font-size:12px !important;
+  color:#5f6368 !important;
+  white-space: nowrap;
+}
+
+#noteEditorView .docTopBtn{
+  border:1px solid #dadce0 !important;
+  background:#fff !important;
+  color:#3c4043 !important;
+  border-radius:6px !important;
+  padding:8px 12px !important;
+  cursor:pointer !important;
+  font-weight:600 !important;
+}
+
+#noteEditorView .docTopBtn.primary{
+  background:#1a73e8 !important;
+  border-color:#1a73e8 !important;
+  color:white !important;
+}
+
+#noteEditorView .docTopBtn.danger{
+  color:#b3261e !important;
+}
+
+#noteEditorView .docsMenuBar{
+  height:32px !important;
+  display:flex !important;
+  align-items:center !important;
+  gap:4px !important;
+  padding:0 14px !important;
+  background:#fff !important;
+  border-bottom:1px solid #eef0f2 !important;
+}
+
+#noteEditorView .docsMenuItem{
+  border:none !important;
+  background:transparent !important;
+  color:#3c4043 !important;
+  padding:5px 8px !important;
+  border-radius:4px !important;
+  cursor:pointer !important;
+}
+
+#noteEditorView .docsToolbar{
+  min-height:46px !important;
+  display:flex !important;
+  align-items:center !important;
+  flex-wrap:wrap !important;
+  gap:6px !important;
+  padding:6px 14px !important;
+  background:#f8fafd !important;
+  border-bottom:1px solid #dadce0 !important;
+  border-radius: 0 0 18px 18px;
+}
+
+#noteEditorView .docsToolbar select{
+  width:auto !important;
+  height:32px !important;
+  border:1px solid #dadce0 !important;
+  border-radius:4px !important;
+  background:white !important;
+  color:#202124 !important;
+  padding:4px 8px !important;
+}
+
+#noteEditorView .docsToolbar input[type="color"]{
+  width:34px !important;
+  height:32px !important;
+  border:1px solid #dadce0 !important;
+  border-radius:4px !important;
+  background:white !important;
+  padding:2px !important;
+}
+
+#noteEditorView .docIconBtn{
+  min-width:32px !important;
+  height:32px !important;
+  border:none !important;
+  border-radius:4px !important;
+  background:transparent !important;
+  color:#3c4043 !important;
+  cursor:pointer !important;
+  font-weight:600 !important;
+  transition: all 0.2s;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+#noteEditorView .docIconBtn:hover{
+  background:#e8eaed !important;
+}
+
+#noteEditorView .docIconBtn.active{
+  background: rgba(139,124,246,.2) !important;
+  color: var(--accent) !important;
+}
+
+#noteEditorView .docsDivider{
+  width:1px !important;
+  height:24px !important;
+  background:#dadce0 !important;
+  margin:0 4px !important;
+}
+
+/* ========================================================
+   GOOGLE DOCS EQUATION TOOLBAR (NEW)
+   ======================================================== */
+.docsMathToolbar {
+    width: 100%;
+    min-height: 36px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 14px;
+    background: #f8fafd;
+    border-bottom: 1px solid #dadce0;
+    border-radius: 0 0 18px 18px;
+}
+
+.math-dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.math-dropbtn {
+    background: transparent;
+    border: none;
+    padding: 6px 10px;
+    cursor: pointer;
+    color: #3c4043;
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: 4px;
+}
+
+.math-dropbtn:hover {
+    background: #e8eaed;
+}
+
+.math-dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #ffffff;
+    min-width: 140px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 100;
+    padding: 8px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    gap: 4px;
+}
+
+.math-dropdown:hover .math-dropdown-content {
+    display: grid;
+}
+
+.math-dropdown-content button {
+    background: transparent;
+    border: 1px solid transparent;
+    cursor: pointer;
+    padding: 6px;
+    font-size: 15px;
+    border-radius: 4px;
+    color: #202124;
+    display: grid;
+    place-items: center;
+}
+
+.math-dropdown-content button:hover {
+    background: #f1f3f4;
+    border-color: #dadce0;
+}
+
+/* Aggressively disable MathLive Keyboard & Styling */
+math-field.docs-equation {
+    min-width: 25px;
+    padding: 2px 4px;
+    border-radius: 4px;
+    border: 1px solid transparent;
+    display: inline-block;
+    background: transparent;
+    outline: none;
+    cursor: text;
+    vertical-align: middle;
+}
+math-field.docs-equation:focus-within {
+    border: 1px solid #1a73e8 !important; /* Google Docs Blue */
+    background: #f8fafd !important;
+    box-shadow: 0 0 0 2px rgba(26,115,232,0.2);
+}
+math-field::part(virtual-keyboard-toggle) {
+    display: none !important;
+}
+math-field::part(menu-toggle) {
+    display: none !important;
+}
+/* ======================================================== */
+
+#noteEditorView .docsBody{
+  flex:1 !important;
+  min-height:auto !important;
+  display:flex !important;
+  justify-content: center !important;
+  background:transparent !important;
+  padding-top: 20px;
+}
+
+#noteEditorView .docsCanvas{
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding:0 0 120px !important;
+  background:transparent !important;
+}
+
+.docsPageWrapper {
+  width: min(100%, 816px);
+  min-height: 1056px;
+  margin: 0 auto;
+  background-color: #fff;
+  background-image: 
+      linear-gradient(90deg, transparent 79px, #ffb3b3 79px, #ffb3b3 81px, transparent 81px),
+      linear-gradient(#e1e4e8 1px, transparent 1px);
+  background-size: 100% 2em;
+  box-shadow: 0 12px 34px rgba(60,64,67,.14);
+  border-radius: 18px;
+  position: relative;
+  overflow: hidden;
+  transition: opacity 0.3s ease;
+}
+
+.docsPageWrapper.bg-edit-mode #noteContentEditor {
+  pointer-events: none !important;
+  opacity: 0.4 !important;
+}
+
+#noteStickersContainer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+#noteContentEditor {
+  padding: 3.5em 4em 3.5em 100px;
+  outline: none;
+  line-height: 2em;
+  font-family: Arial, sans-serif;
+  font-size: 12pt;
+  min-height: 100%;
+  position: relative;
+  z-index: 10;
+  background: transparent;
+  color: #202124;
+  transition: opacity 0.3s ease;
+}
+
+#noteContentEditor * {
+  line-height: 2em !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.custom-sticker {
+  position: absolute;
+  pointer-events: auto;
+  user-select: none;
+  -webkit-user-select: none; 
+  -webkit-touch-callout: none;
+  touch-action: none; 
+}
+.custom-sticker img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  pointer-events: none;
+  -webkit-user-drag: none; 
+}
+.custom-sticker:hover,
+.custom-sticker.active-sticker,
+.custom-sticker.is-dragging,
+.custom-sticker.selected-sticker {
+  outline: 2px dashed rgba(139,124,246,0.8);
+}
+
+.delete-handle {
+    position: absolute;
+    top: -12px;
+    right: -12px;
+    width: 24px;
+    height: 24px;
+    background: var(--danger);
+    color: white;
+    border-radius: 50%;
+    display: none;
+    place-items: center;
+    font-weight: bold;
+    font-size: 14px;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    z-index: 20;
+}
+.custom-sticker:hover .delete-handle,
+.custom-sticker.active-sticker .delete-handle,
+.custom-sticker.is-dragging .delete-handle,
+.custom-sticker.selected-sticker .delete-handle {
+    display: grid !important;
+}
+
+.sticker-handle {
+  position: absolute;
+  width: 14px; height: 14px;
+  background: #fff;
+  border: 2px solid var(--accent);
+  border-radius: 50%;
+  display: none;
+  box-shadow: 0 2px 4px rgba(0,0,0,.2);
+}
+.custom-sticker:hover .sticker-handle,
+.custom-sticker.active-sticker .sticker-handle,
+.custom-sticker.is-dragging .sticker-handle,
+.custom-sticker.selected-sticker .sticker-handle {
+  display: block !important;
+}
+.resize-handle {
+  bottom: -7px; right: -7px;
+  cursor: se-resize;
+}
+.rotate-handle {
+  top: -30px; left: 50%;
+  transform: translateX(-50%);
+  cursor: grab;
+}
+.rotate-handle::after {
+  content: '';
+  position: absolute;
+  top: 14px; left: 4px;
+  width: 2px; height: 14px;
+  background: var(--accent);
+}
+
+.bounce{
+  animation:bob 0.25s ease-in-out infinite !important;
+  transform-origin:center bottom;
+}
+
+@keyframes bob{
+  0%,100%{ transform:translateY(0); }
+  50%{ transform:translateY(-7px); }
+}
+
+.docsDropdown{
+  position:fixed;
+  min-width:180px;
+  background:var(--panel-strong);
+  border:1px solid var(--border);
+  border-radius:14px;
+  box-shadow:0 20px 50px rgba(0,0,0,.18);
+  padding:6px;
+  z-index:3000;
+  display:grid;
+  gap:4px;
+  backdrop-filter:blur(10px);
+}
+
+.docsDropdown button{
+  width:100%;
+  text-align:left;
+  padding:10px 12px;
+  border:none;
+  border-radius:10px;
+  background:transparent;
+  color:var(--text);
+  cursor:pointer;
+  font:inherit;
+}
+
+.docsDropdown button:hover{
+  background:rgba(127,127,127,.12);
+}
+
+#stickersView .stickerThumb{
+  width:100%;
+  aspect-ratio:1 / 1;
+  object-fit:contain;
+  background:rgba(255,255,255,.6);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:10px;
+}
+
+#stickersView .stickerCard{
+  display:grid;
+  gap:10px;
+}
+
+#floatingStickerBook {
+  position: fixed; 
+  top: 150px; 
+  right: 100px;
+  width: 320px; 
+  height: 450px;
+  background: rgba(255,255,255,0.85);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(139,124,246,0.3);
+  border-radius: 18px;
+  box-shadow: 0 30px 80px rgba(139,124,246,0.15);
+  z-index: 9999;
+  display: none;
+  flex-direction: column;
+}
+#floatingStickerBook.show { 
+  display: flex; 
+}
+#stickerBookHeader {
+  cursor: move; 
+  padding: 14px; 
+  background: linear-gradient(135deg, rgba(139,124,246,0.2), rgba(183,166,255,0.1));
+  border-bottom: 1px solid rgba(139,124,246,0.3);
+  display: flex; 
+  justify-content: space-between;
+  align-items: center;
+  border-radius: 18px 18px 0 0;
+}
+#floatingStickersList {
+  flex: 1; 
+  overflow-y: auto; 
+  padding: 14px; 
+  display: grid; 
+  grid-template-columns: 1fr 1fr; 
+  gap: 12px;
+}
+#floatingStickersList .stickerThumb {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: contain;
+  background: rgba(255,255,255,.8);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 8px;
+  cursor: pointer;
+  transition: transform 0.2s, border-color 0.2s;
+}
+#floatingStickersList .stickerThumb:hover {
+  transform: scale(1.05);
+  border-color: var(--accent);
+}
+
+  </style>
+</head>
+<body>
+  <canvas id="confettiCanvas"></canvas>
+ 
+  <div class="app" id="appShell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-icon">TD</div>
+        <div>
+          <h1>ToDimension</h1>
+          <p>Weekly worlds, saved progress</p>
+        </div>
+      </div>
+ 
+      <div class="profileCard" onclick="navigateTo('settings', '#settings')" style="cursor:pointer;" title="Go to Settings">
+        <img id="profilePreview" class="pfp" alt="Profile picture">
+        <div class="profileText">
+          <strong id="profileName">Your Name</strong>
+          <span id="profileMeta">Custom to-do worlds</span>
+        </div>
+      </div>
+ 
+      <nav class="nav">
+        <a href="#websitenotes" data-tab="websitenotes">Website notes <span>▸</span></a>
+        <a href="#schedule" data-tab="schedule">To-do List <span>▸</span></a>
+        <a href="#calendar" data-tab="calendar">Calendar <span>▸</span></a>
+        <a href="#notes" data-tab="notes">Notes <span>▸</span></a>
+        <a href="#achievements" data-tab="achievements">Achievements <span>▸</span></a>
+        <a href="#characters" data-tab="characters">Characters <span>▸</span></a>
+        <a href="#themes" data-tab="themes">Themes <span>▸</span></a>
+        <a href="#stickers" data-tab="stickers">Stickers <span>▸</span></a>
+        <a href="#settings" data-tab="settings">Settings <span>▸</span></a>
+      </nav>
+ 
+      <div class="sidebarFooter">
+        <button class="btn" id="saveAllBtn">Save All</button>
+      </div>
+    </aside>
+ 
+    <main class="main">
+      <div class="topbar">
+        <div class="hero">
+          <div>
+            <h2 id="heroTitle">To-do List</h2>
+            <p id="heroText">Create weeks, track progress, and keep everything saved.</p>
+          </div>
+        </div>
+      </div>
+ 
+      <section class="view" id="websitenotesView">
+        <div class="panel" style="line-height: 1.8; font-size: 15px; padding: 24px;">
+          <h3 style="margin-top: 0; font-size: 22px; color: var(--accent);">Hello! Welcome to my website, ToDimension.</h3>
+          <p>Since this website is still in beta, I'd like to explain a few things I wasn't exactly able to fix so easily, so you'll have to bear with me.</p>
+          <p><strong>First, compatibility.</strong> Noott exactly compatible with devices without a mouse and keyboard... will fix that soon! [By soon.. I mean by when someone really asks for it..]</p>
+          <p><strong>For the stickers,</strong> when you open the sticker book in the notes, you'll see this "Unlock background" feature. This allows you to move stickers that you have put behind the text in your notebook. To be able to add text to your notebook again, you simply lock the background.</p>
+          <p><strong>In the notes,</strong> the broom emoji beside the highlight just means it removes the highlighter on your text.</p>
+          <p><strong>Only saves per browser.</strong> I haven't added a sign in feature yet, but soon I will. For now, your progress only saves to your browser. It won't save anywhere else. Please let me know if you have any problems with this.</p>
+          <p style="color: var(--danger); font-weight: bold;">DO NOT FORGET to save your notes! If you exit without saving, well.. it won't save.</p>
+          <p><strong>For adding files</strong> for your character sprites, voice lines, and themes. When you reload, it will go back to "No file chosen". This doesn't mean it did not save (unless you didn't save it). You can test it by opening your notes or the fact your theme background is still there once you reload. It will still be there.</p>
+          <p style="margin-bottom: 0; margin-top: 24px; font-weight: 600; color: var(--accent);">Let me know if you have suggestions or problems you run into. Have fun!</p>
+        </div>
+      </section>
+
+      <section class="view" id="scheduleView">
+        <div class="grid2">
+          <div class="panel">
+            <div class="sectionTitle">
+              <h3>Weeks</h3>
+              <button class="btn secondary" id="addWeekBtn">+ Add a week or day</button>
+            </div>
+            <div class="weekGrid" id="weeksList"></div>
+          </div>
+ 
+          <div class="panel">
+            <h3 class="editorTitle">Week editor</h3>
+ 
+            <div class="small">Name</div>
+            <input class="input" id="weekNameInput" placeholder="Week name">
+ 
+            <div class="small" style="margin-top:10px;">Assigned character</div>
+            <select id="weekCharacterSelect"></select>
+ 
+            <div class="toolbar" style="margin-top:18px;">
+              <button class="btn" id="saveWeekBtn">Save Week</button>
+              <button class="btn danger" id="deleteWeekBtn">Remove</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="view" id="calendarView">
+        <div class="panel">
+          <div class="sectionTitle">
+            <h3>Overall Tasks Calendar</h3>
+            <span class="muted">All your tasks across all weeks</span>
+          </div>
+          <div id="actualCalendarGrid" style="margin-bottom:24px;"></div>
+          <div id="overallCalendarContainer" class="cardGrid" style="grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 16px;">
+          </div>
+        </div>
+      </section>
+ 
+      <section class="view" id="weekView" style="position: relative;">
+        <div id="weekFloatingCalendar" style="display:none; position:absolute; top:20px; right:20px; width:400px; max-width:90%; background:var(--panel-strong); border:1px solid var(--border); border-radius:18px; padding:16px; box-shadow:0 30px 80px rgba(0,0,0,0.2); z-index:9000; backdrop-filter:blur(20px);">
+            <div id="weekFloatingCalendarHeader" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; cursor:move;">
+                <strong style="color:var(--text); font-size:16px;">Week Tasks Calendar</strong>
+                <button class="iconBtn" onclick="toggleWeekCalendar()" style="cursor:pointer;">✕</button>
+            </div>
+            <div id="weekPageActualCalendarGrid"></div>
+        </div>
+
+        <div class="weekScene">
+          <div class="panel">
+            <div class="sectionTitle">
+              <h3 id="weekPageTitle">Week</h3>
+              <div class="toolbar" style="margin:0;">
+                <button class="btn secondary" id="backToScheduleBtn">Back to To-do List</button>
+                <button class="btn secondary" onclick="toggleWeekCalendar()" style="color:var(--accent);">📅 Calendar</button>
+                <button class="btn danger" id="deleteWeekPageBtn">Remove Week</button>
+              </div>
+            </div>
+ 
+            <div class="sectionTitle" style="margin-top:-2px;">
+              <div class="pillRow">
+                <div class="pill" id="weekPageXpPill">XP earned: 0</div>
+                <div class="pill" id="weekPageProgressPill">0% complete</div>
+              </div>
+            </div>
+ 
+            <div style="margin-top:4px;">
+              <div class="weekHead">
+                <strong>Week/Day progress</strong>
+                <span class="muted" id="weekPageProgressText">0%</span>
+              </div>
+              <div class="progress"><div id="weekPageProgressFill"></div></div>
+            </div>
+ 
+            <div class="week-layout-grid" style="margin-top:20px;">
+              <div>
+                <div class="sectionTitle">
+                  <h3 style="font-size:16px;">To-do list</h3>
+                </div>
+                <div class="task-input-row">
+                  <input class="input" id="newWeekTaskInputPage" placeholder="Add a task">
+                  <div style="position:relative; width:45px; height:45px; flex-shrink:0;">
+                    <input class="input" type="date" id="newWeekTaskDatePage" title="Due Date" style="position:absolute; inset:0; opacity:0; z-index:2; cursor:pointer;">
+                    <div class="btn secondary" style="position:absolute; inset:0; display:grid; place-items:center; z-index:1; font-size:18px; padding:0; margin:0;">📅</div>
+                  </div>
+                  <button class="btn" id="addWeekTaskBtnPage">Add</button>
+                </div>
+                <div class="taskList" id="weekPageTasksList"></div>
+              </div>
+              <div>
+                <div class="sectionTitle">
+                  <h3 style="font-size:16px;">Important this week</h3>
+                </div>
+                <div class="task-input-row">
+                  <input class="input" id="newWeekPriorityInputPage" placeholder="Add a priority">
+                  <div style="position:relative; width:45px; height:45px; flex-shrink:0;">
+                    <input class="input" type="date" id="newWeekPriorityDatePage" title="Due Date" style="position:absolute; inset:0; opacity:0; z-index:2; cursor:pointer;">
+                    <div class="btn secondary" style="position:absolute; inset:0; display:grid; place-items:center; z-index:1; font-size:18px; padding:0; margin:0;">📅</div>
+                  </div>
+                  <button class="btn" id="addWeekPriorityBtnPage">Add</button>
+                </div>
+                <div class="taskList" id="weekPagePriorityList"></div>
+              </div>
+            </div>
+          </div>
+ 
+          <div class="companionStage">
+            <div class="companionDock">
+              <div class="bubble" id="weekPageCharacterBubble"></div>
+              <div class="companionRow">
+                <div class="companionMeta">
+                  <strong id="weekPageCharacterName">Assign a character</strong>
+                  <span class="small" id="weekPageCharacterMeta">Pick a character in the editor.</span>
+                </div>
+                <img id="weekPageCharacterImg" alt="Week character">
+              </div>
+            </div>
+ 
+          </div>
+        </div>
+      </section>
+ 
+      <section class="view" id="achievementsView">
+        <div class="grid2">
+          <div class="panel">
+            <div class="sectionTitle">
+              <h3>Achievements</h3>
+              <span class="muted">XP, levels, and goal progress</span>
+            </div>
+ 
+            <div class="statGrid" id="statsGrid"></div>
+ 
+            <div style="margin-top:16px;">
+              <div class="sectionTitle">
+                <h3 style="font-size:16px;">Goals</h3>
+                <span class="muted">Unlock these as you go</span>
+              </div>
+              <div class="goalList" id="goalsList"></div>
+            </div>
+          </div>
+ 
+          <div class="panel">
+            <div class="sectionTitle">
+              <h3>XP per week</h3>
+              <span class="muted">Every task and week bonus counts</span>
+            </div>
+            <div class="cardGrid" id="weekXpList"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="view" id="notesView">
+  <div class="grid2">
+    <div class="panel">
+      <div class="sectionTitle">
+        <h3>Note Groups</h3>
+        <button class="btn secondary" id="addNoteGroupBtn">+ Add note group</button>
+      </div>
+      <div class="weekGrid" id="noteGroupsList"></div>
+    </div>
+
+    <div class="panel">
+      <h3 class="editorTitle">Group editor</h3>
+      <div class="small">Name</div>
+      <input class="input" id="noteGroupNameInput" placeholder="Group name">
+      <div class="small" style="margin-top:10px;">Assigned character</div>
+      <select id="noteGroupCharacterSelect"></select>
+      <div class="toolbar" style="margin-top:18px;">
+        <button class="btn" id="saveNoteGroupBtn">Save Group</button>
+        <button class="btn danger" id="deleteNoteGroupBtn">Remove</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="view" id="noteEditorView">
+  <div class="docsApp">
+    <div class="docsTopbar">
+      <button class="docTopBtn" id="backToNotesBtn">Back</button>
+
+      <div class="docsTitleArea">
+        <div class="docsSubtitle" id="noteGroupPageTitle">Notes</div>
+        <select id="pageSelect" class="docsTitleInput" style="width:140px; font-size:14px; margin-left: 10px; border: 1px solid var(--border) !important; padding: 4px; border-radius: 6px;"></select>
+        <input id="noteTitleInput" class="docsTitleInput" placeholder="Page title (optional)">
+      </div>
+
+      <button class="docTopBtn" id="addNoteBtn">Add Page</button>
+      <button class="docTopBtn primary" id="saveNoteBtn">Save</button>
+      <button class="docTopBtn danger" id="deleteNoteBtn">Delete Page</button>
+    </div>
+
+    <div class="docsMenuBar">
+      <button class="docsMenuItem" id="toggleStickerBookBtn" style="color: var(--accent); font-weight: 600;">✨ Sticker Book</button>
+    </div>
+
+    <div class="docsToolbar" style="border-radius:0;">
+      <select id="noteFontSelect">
+        <option value="Arial">Arial</option>
+        <option value="Segoe UI">Segoe UI</option>
+        <option value="Georgia">Georgia</option>
+        <option value="Courier New">Courier New</option>
+        <option value="Caveat, cursive">Caveat (Handwriting)</option>
+        <option value="'Comic Neue', cursive">Comic Neue</option>
+        <option value="Pacifico, cursive">Pacifico</option>
+        <option value="Merriweather, serif">Merriweather</option>
+        <option value="Inter, sans-serif">Inter</option>
+      </select>
+
+      <select id="noteSizeSelect">
+        <option value="2">10</option>
+        <option value="3" selected>12</option>
+        <option value="4">14</option>
+        <option value="5">18</option>
+        <option value="6">24</option>
+      </select>
+
+      <button class="docIconBtn" data-cmd="undo">↶</button>
+      <button class="docIconBtn" data-cmd="redo">↷</button>
+      <span class="docsDivider"></span>
+
+      <button class="docIconBtn" data-cmd="bold"><b>B</b></button>
+      <button class="docIconBtn" data-cmd="italic"><i>I</i></button>
+      <button class="docIconBtn" data-cmd="underline"><u>U</u></button>
+
+      <input type="color" id="noteTextColorInput" value="#111827" title="Text Color">
+      <input type="color" id="noteHighlightInput" value="#fff2a8" title="Highlight Color">
+      <button class="docIconBtn" id="clearHighlightBtn" title="Clear Highlight">🧹</button>
+
+      <span class="docsDivider"></span>
+
+      <button class="docIconBtn" id="moveTextUpBtn" title="Move Selected Text Line Up 1px">↑</button>
+      <button class="docIconBtn" id="moveTextDownBtn" title="Move Selected Text Line Down 1px">↓</button>
+      
+      <span class="docsDivider"></span>
+      <button class="docIconBtn" id="insertMathBtn" title="Insert Equation" style="font-weight:bold;">∑</button>
+
+      <span class="docsDivider"></span>
+
+      <button class="docIconBtn" data-cmd="justifyLeft">L</button>
+      <button class="docIconBtn" data-cmd="justifyCenter">C</button>
+      <button class="docIconBtn" data-cmd="justifyRight">R</button>
+      <button class="docIconBtn" data-cmd="insertUnorderedList">•</button>
+      <button class="docIconBtn" data-cmd="insertOrderedList">1.</button>
+
+      <span class="docsDivider"></span>
+
+      <button class="docIconBtn" id="noteLinkBtn">Link</button>
+      <button class="docIconBtn" id="clearAllTextBtn" style="color: var(--danger) !important; font-weight: bold;" title="Clear All Text">Clear</button>
+    </div>
+
+    <!-- GOOGLE DOCS EQUATION TOOLBAR (Dynamically hidden/shown) -->
+    <div class="docsMathToolbar" id="mathToolbar" style="display: none;">
+      <div class="math-dropdown">
+        <button class="math-dropbtn" title="Greek letters">αβΔ ▾</button>
+        <div class="math-dropdown-content" style="grid-template-columns: repeat(4, 1fr);">
+          <button onmousedown="insertMathCmd('\\alpha', event)">α</button>
+          <button onmousedown="insertMathCmd('\\beta', event)">β</button>
+          <button onmousedown="insertMathCmd('\\gamma', event)">γ</button>
+          <button onmousedown="insertMathCmd('\\Delta', event)">Δ</button>
+          <button onmousedown="insertMathCmd('\\theta', event)">θ</button>
+          <button onmousedown="insertMathCmd('\\pi', event)">π</button>
+          <button onmousedown="insertMathCmd('\\sigma', event)">σ</button>
+          <button onmousedown="insertMathCmd('\\Omega', event)">Ω</button>
+        </div>
+      </div>
+
+      <div class="math-dropdown">
+        <button class="math-dropbtn" title="Miscellaneous operations">×÷± ▾</button>
+        <div class="math-dropdown-content" style="grid-template-columns: repeat(3, 1fr);">
+          <button onmousedown="insertMathCmd('\\times', event)">×</button>
+          <button onmousedown="insertMathCmd('\\div', event)">÷</button>
+          <button onmousedown="insertMathCmd('\\cdot', event)">·</button>
+          <button onmousedown="insertMathCmd('\\pm', event)">±</button>
+          <button onmousedown="insertMathCmd('\\approx', event)">≈</button>
+          <button onmousedown="insertMathCmd('\\infty', event)">∞</button>
+        </div>
+      </div>
+
+      <div class="math-dropdown">
+        <button class="math-dropbtn" title="Relations">&lt;≠⊃ ▾</button>
+        <div class="math-dropdown-content" style="grid-template-columns: repeat(3, 1fr);">
+          <button onmousedown="insertMathCmd('<', event)">&lt;</button>
+          <button onmousedown="insertMathCmd('>', event)">&gt;</button>
+          <button onmousedown="insertMathCmd('\\leq', event)">≤</button>
+          <button onmousedown="insertMathCmd('\\geq', event)">≥</button>
+          <button onmousedown="insertMathCmd('\\neq', event)">≠</button>
+          <button onmousedown="insertMathCmd('\\equiv', event)">≡</button>
+        </div>
+      </div>
+
+      <div class="math-dropdown">
+        <button class="math-dropbtn" title="Math operations">√()x² ▾</button>
+        <div class="math-dropdown-content" style="grid-template-columns: repeat(3, 1fr);">
+          <button onmousedown="insertMathCmd('\\frac{#?}{#?}', event)">a/b</button>
+          <button onmousedown="insertMathCmd('\\sqrt{#?}', event)">√</button>
+          <button onmousedown="insertMathCmd('{#?}^{#?}', event)">x²</button>
+          <button onmousedown="insertMathCmd('{#?}_{#?}', event)">x₂</button>
+          <button onmousedown="insertMathCmd('\\sum_{#?}^{#?} #?', event)">∑</button>
+          <button onmousedown="insertMathCmd('\\int_{#?}^{#?} #?', event)">∫</button>
+        </div>
+      </div>
+
+      <div class="math-dropdown">
+        <button class="math-dropbtn" title="Arrows">←↑→ ▾</button>
+        <div class="math-dropdown-content" style="grid-template-columns: repeat(3, 1fr);">
+          <button onmousedown="insertMathCmd('\\rightarrow', event)">→</button>
+          <button onmousedown="insertMathCmd('\\leftarrow', event)">←</button>
+          <button onmousedown="insertMathCmd('\\uparrow', event)">↑</button>
+          <button onmousedown="insertMathCmd('\\downarrow', event)">↓</button>
+          <button onmousedown="insertMathCmd('\\leftrightarrow', event)">↔</button>
+          <button onmousedown="insertMathCmd('\\Rightarrow', event)">⇒</button>
+        </div>
+      </div>
+      <span class="docsDivider"></span>
+      <button class="docIconBtn" id="closeMathToolbarBtn" title="Close Equation Toolbar" style="font-size:12px; font-weight:600; padding:0 8px; width:auto; color:var(--danger);">✕ Close</button>
+    </div>
+
+    <div class="noteCompanionStage">
+      <div class="noteCompanionDock">
+        <div class="bubble" id="notePageCharacterBubble"></div>
+        <div class="companionRow noteCompanionRow">
+          <div class="companionMeta">
+            <strong id="notePageCharacterName">Assign a character</strong>
+            <span class="small" id="notePageCharacterMeta">This notebook can have its own companion.</span>
+          </div>
+          <img id="notePageCharacterImg" alt="Note character">
+        </div>
+      </div>
+    </div>
+
+    <div class="docsBody">
+      <main class="docsCanvas">
+        <div class="docsPageWrapper">
+           <div id="noteStickersContainer"></div>
+           <div id="noteContentEditor" class="docsPageContent" contenteditable="true"></div>
+        </div>
+      </main>
+    </div>
+  </div>
+</section>
+ 
+      <section class="view" id="charactersView">
+        <div class="grid2">
+          <div class="panel">
+            <div class="sectionTitle">
+              <h3>Characters</h3>
+              <button class="btn secondary" id="addCharacterBtn">+ Add Character</button>
+            </div>
+            <div class="cardGrid" id="charactersList"></div>
+          </div>
+ 
+          <div class="panel">
+            <h3 class="editorTitle" id="characterEditorTitle">Character editor</h3>
+ 
+            <div class="small">Name</div>
+            <input class="input" id="characterNameInput" placeholder="Character name">
+ 
+            <div class="small" style="margin-top:10px;">Sprite</div>
+            <input class="input" id="characterSpriteInput" type="file" accept="image/*">
+ 
+            <div class="twoCol" style="margin-top:10px;">
+              <div>
+                <div class="small">Communication</div>
+                <select id="characterModeInput">
+                  <option value="voice">Voice lines</option>
+                  <option value="bubble">Chat bubbles</option>
+                  <option value="both">Both</option>
+                </select>
+              </div>
+              <div>
+                <div class="small">Talking animation</div>
+                <select id="characterBounceInput">
+                  <option value="on">Bounce on</option>
+                  <option value="off">Bounce off</option>
+                </select>
+              </div>
+            </div>
+ 
+            <div class="small" style="margin-top:10px;">Chat bubble text (up to 3 lines per event)</div>
+            <div class="small" style="margin-top:6px;">When you open the week</div>
+            <input class="input" id="charBubbleOpen1" placeholder="Line 1">
+            <input class="input" id="charBubbleOpen2" placeholder="Line 2" style="margin-top:8px;">
+            <input class="input" id="charBubbleOpen3" placeholder="Line 3" style="margin-top:8px;">
+ 
+            <div class="small" style="margin-top:8px;">When you add a new task</div>
+            <input class="input" id="charBubbleAdd1" placeholder="Line 1">
+            <input class="input" id="charBubbleAdd2" placeholder="Line 2" style="margin-top:8px;">
+            <input class="input" id="charBubbleAdd3" placeholder="Line 3" style="margin-top:8px;">
+ 
+            <div class="small" style="margin-top:8px;">When you finish a task</div>
+            <input class="input" id="charBubbleDone1" placeholder="Line 1">
+            <input class="input" id="charBubbleDone2" placeholder="Line 2" style="margin-top:8px;">
+            <input class="input" id="charBubbleDone3" placeholder="Line 3" style="margin-top:8px;">
+ 
+            <div class="small" style="margin-top:8px;">When you've finished a week</div>
+            <input class="input" id="charBubbleWeek1" placeholder="Line 1">
+            <input class="input" id="charBubbleWeek2" placeholder="Line 2" style="margin-top:8px;">
+            <input class="input" id="charBubbleWeek3" placeholder="Line 3" style="margin-top:8px;">
+ 
+            <div class="small" style="margin-top:10px;">Voice lines (select up to 3 files per event)</div>
+            <div class="small" style="margin-top:8px;">When you open the week</div>
+            <input class="input" id="charVoiceOpen" type="file" accept="audio/*" multiple>
+            <div class="small" style="margin-top:8px;">When you add a new task</div>
+            <input class="input" id="charVoiceAdd" type="file" accept="audio/*" multiple style="margin-top:8px;">
+            <div class="small" style="margin-top:8px;">When you finish a task</div>
+            <input class="input" id="charVoiceDone" type="file" accept="audio/*" multiple style="margin-top:8px;">
+            <div class="small" style="margin-top:8px;">When you've finished a week</div>
+            <input class="input" id="charVoiceWeek" type="file" accept="audio/*" multiple style="margin-top:8px;">
+ 
+            <div class="previewBox" style="margin-top:14px;">
+              <div style="display:flex; gap:12px; align-items:center;">
+                <img id="characterPreviewImg" class="spritePreview" alt="Character preview">
+                <div>
+                  <strong id="characterPreviewName">Preview</strong>
+                  <div class="small" id="characterPreviewMode">Bubble mode</div>
+                </div>
+              </div>
+              <div id="characterPreviewBubble" class="bubble">Hello.</div>
+            </div>
+ 
+            <div class="toolbar">
+              <button class="btn" id="saveCharacterBtn">Save Character</button>
+              <button class="btn secondary" id="clearCharacterBtn">New Character</button>
+              <button class="btn danger" id="deleteCharacterBtn">Remove</button>
+            </div>
+          </div>
+        </div>
+      </section>
+ 
+      <section class="view" id="themesView">
+        <div class="grid2">
+          <div class="panel">
+            <div class="sectionTitle">
+              <h3>Themes</h3>
+              <button class="btn secondary" id="addThemeBtn">+ Add Theme</button>
+            </div>
+            <div class="cardGrid" id="themesList"></div>
+          </div>
+ 
+          <div class="panel">
+            <h3 class="editorTitle" id="themeEditorTitle">Theme editor</h3>
+ 
+            <div class="small">Theme name</div>
+            <input class="input" id="themeNameInput" placeholder="Theme name">
+ 
+            <div class="small" style="margin-top:10px;">Background image</div>
+            <input class="input" id="themeBgInput" type="file" accept="image/*">
+ 
+            <div class="small" style="margin-top:10px;">Theme icon</div>
+            <input class="input" id="themeIconInput" type="file" accept="image/*">
+ 
+            <div class="small" style="margin-top:10px;">Characters in this theme</div>
+            <div id="themeCharacterChecks" class="list"></div>
+ 
+            <div class="toolbar">
+              <button class="btn" id="saveThemeBtn">Save Theme</button>
+              <button class="btn secondary" id="applyThemeBtn">Use This Theme</button>
+              <button class="btn secondary" id="clearThemeBtn">New Theme</button>
+              <button class="btn danger" id="deleteThemeBtn">Remove</button>
+            </div>
+ 
+            <div class="previewBox" id="themePreviewBox" style="margin-top:14px;">
+              <strong id="themePreviewName">Preview</strong>
+              <div class="small">This theme only changes visuals. It does not remove progress.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+ 
+
+<section class="view" id="stickersView">
+  <div class="grid2">
+    <div class="panel">
+      <div class="sectionTitle">
+        <h3>Sticker Library</h3>
+        <span class="muted">Your imported stickers</span>
+      </div>
+      <div class="cardGrid" id="stickersList" style="grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));"></div>
+    </div>
+
+    <div class="panel">
+      <h3 class="editorTitle">Sticker importer</h3>
+      <div class="small">Add sticker images</div>
+      <input class="input" id="stickerInput" type="file" accept="image/*" multiple>
+
+      <div class="toolbar" style="margin-top:18px;">
+        <button class="btn" id="importStickerBtn">Import Stickers</button>
+        <button class="btn secondary" id="clearStickerBtn">Clear Library</button>
+      </div>
+
+      <div class="previewBox" style="margin-top:14px;">
+        <strong>How to use them</strong>
+        <div class="small">Open Notes, click the "Sticker Book" button in the menu. A movable panel will open to let you place stickers freely.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+      <section class="view" id="settingsView">
+        <div class="grid2">
+          <div class="panel">
+            <div class="sectionTitle">
+              <h3>Profile</h3>
+              <span class="muted">Your visible identity</span>
+            </div>
+ 
+            <div class="small">Username</div>
+            <input class="input" id="usernameInput" placeholder="Username">
+ 
+            <div class="small" style="margin-top:10px;">Profile picture</div>
+            <input class="input" id="pfpInput" type="file" accept="image/*">
+ 
+            <div class="toolbar">
+              <button class="btn" id="saveSettingsBtn">Save Profile</button>
+            </div>
+
+            <div class="sectionTitle" style="margin-top: 30px;">
+              <h3>Progress Reset</h3>
+            </div>
+            <div class="small" style="margin-bottom:10px;">Warning: This clears all XP entirely.</div>
+            <button class="btn danger" id="resetXpBtn">Reset XP</button>
+          </div>
+ 
+          <div class="panel">
+            <div class="sectionTitle">
+              <h3>Appearance</h3>
+              <span class="muted">Soft colors, your choice</span>
+            </div>
+ 
+            <div class="small">Choose a color</div>
+            <div class="colorRow" id="paletteRow"></div>
+ 
+            <div class="small" style="margin-top:10px;">Hex color</div>
+            <input class="input" id="accentHexInput" placeholder="#8b7cf6">
+ 
+            <div class="small" style="margin-top:10px;">Mode</div>
+            <select id="modeInput">
+              <option value="system">System</option>
+              <option value="light">Light</option>
+              <option value="dark">Dark</option>
+            </select>
+ 
+            <div class="toolbar">
+              <button class="btn secondary" id="saveAppearanceBtn">Save Appearance</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+ 
+  <div class="toast" id="toast">Saved</div>
+
+  <div id="floatingStickerBook">
+    <div id="stickerBookHeader">
+      <strong style="color:var(--text);">✨ Sticker Book</strong>
+      <div style="display:flex; gap:8px; align-items:center;">
+        <button class="iconBtn" id="bgEditToggleBtn" style="font-size:11px; padding:4px 8px; border:1px solid rgba(139,124,246,0.5); border-radius:8px;" title="Temporarily locks text editing to easily click stickers sent behind text.">Unlock Background</button>
+        <button class="iconBtn" onclick="document.getElementById('floatingStickerBook').classList.remove('show')">✕</button>
+      </div>
+    </div>
+    <div id="floatingStickersList"></div>
+  </div>
+
+  <div id="stickerContextMenu" class="docsDropdown" style="display:none; z-index:10000;">
+     <button onclick="stkAction('front')">Move to Front</button>
+     <button onclick="stkAction('back')">Move to Back</button>
+     <button onclick="stkAction('behind')">Toggle Behind Text</button>
+     <button onclick="stkAction('delete')" style="color:var(--danger);">Delete Sticker</button>
+  </div>
+ 
+  <script>
+    const DB_NAME = 'ToDimensionDB';
+    const STORE_NAME = 'stateStore';
+    const PALETTE = ['#8b7cf6','#7c9cff','#6cc7b8','#f39ac9','#f4a261','#96c15d','#9b8cff','#9c7bd8','#e88c7d','#68b6d7','#7bc4a2','#d48bb0'];
+    let currentVoiceAudio = null;
+    let currentSpeechActive = false;
+    let currentSpeechTimer = null;
+    let stickerLongPressTimer = null;
+    window.selectedStickerId = null; 
+
+    let viewingYear = new Date().getFullYear();
+    let viewingMonth = new Date().getMonth();
+ 
+    const ACHIEVEMENTS = [
+      { id:'first_task', title:'First Step', desc:'Complete 1 task.', target:1, key:'tasksCompleted' },
+      { id:'five_tasks', title:'Getting Warmed Up', desc:'Complete 5 tasks.', target:5, key:'tasksCompleted' },
+      { id:'ten_tasks', title:'Momentum', desc:'Complete 10 tasks.', target:10, key:'tasksCompleted' },
+      { id:'first_week', title:'Week Winner', desc:'Finish 1 week.', target:1, key:'weeksCompleted' },
+      { id:'two_weeks', title:'Rolling Along', desc:'Finish 2 weeks.', target:2, key:'weeksCompleted' },
+      { id:'seventy', title:'70% Club', desc:'Reach 70% on a week.', target:70, key:'bestWeekPercent' },
+      { id:'perfect', title:'Perfect Week', desc:'Reach 100% on a week.', target:100, key:'bestWeekPercent' },
+      { id:'two_in_week', title:'2 in One Week', desc:'Complete 2 tasks in one week.', target:2, key:'maxTasksInWeek' },
+      { id:'level3', title:'Level 3', desc:'Reach level 3.', target:3, key:'level' }
+    ];
+ 
+    const uid = () => Math.random().toString(36).slice(2, 10);
+ 
+    function stopCurrentVoice(){
+      if (currentVoiceAudio){
+        currentVoiceAudio.pause();
+        try{ currentVoiceAudio.currentTime = 0; }catch{}
+        currentVoiceAudio = null;
+      }
+    }
+ 
+    const defaultData = {
+      profile: { username:'Your Name', pfp:'' },
+      settings: { accent:'#8b7cf6', mode:'system' },
+      stats: { totalXP:0, tasksCompleted:0, weeksCompleted:0 },
+      activeTab:'websitenotes',
+      activeWeekId:'',
+      activeCharacterId:'',
+      activeThemeId:'',
+      activeNoteGroupId:'',
+      activeNoteId:'',
+      weeks:[
+        { id:uid(), name:'Week 1', characterId:'', themeCharacters:{}, tasks:[], priorities:[], xp:0, lastSpeech:null, weekBonusAwarded:false },
+        { id:uid(), name:'Week 2', characterId:'', themeCharacters:{}, tasks:[], priorities:[], xp:0, lastSpeech:null, weekBonusAwarded:false }
+      ],
+      characters:[],
+      themes:[],
+      notes:[],
+      stickers:[]
+    };
+ 
+    let state = buildState(null);
+ 
+    const confettiCanvas = document.getElementById('confettiCanvas');
+    const confettiCtx = confettiCanvas.getContext('2d');
+    let confettiPieces = [];
+    let confettiLoopRunning = false;
+ 
+    function resizeConfettiCanvas(){
+      confettiCanvas.width = window.innerWidth;
+      confettiCanvas.height = window.innerHeight;
+    }
+ 
+    function burstConfetti(x, y, amount = 50, spread = 8){
+      const colors = PALETTE.concat(['#ffffff', '#ffd166', '#ff8fab']);
+      for (let i = 0; i < amount; i++){
+        const angle = Math.random() * Math.PI * 2;
+        const speed = Math.random() * spread + 2;
+        const p = {
+          x, y,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed - Math.random() * 2,
+          gravity: 0.12 + Math.random() * 0.08,
+          rot: Math.random() * Math.PI,
+          spin: (Math.random() - 0.5) * 0.25,
+          size: 6 + Math.random() * 7,
+          life: 90 + Math.random() * 40,
+          color: colors[Math.floor(Math.random() * colors.length)]
+        };
+        confettiPieces.push(p);
+      }
+      if (!confettiLoopRunning) runConfettiLoop();
+    }
+ 
+    function runConfettiLoop(){
+      confettiLoopRunning = true;
+      const tick = () => {
+        confettiCtx.clearRect(0,0,confettiCanvas.width,confettiCanvas.height);
+        confettiPieces = confettiPieces.filter(p => {
+          p.vy += p.gravity;
+          p.x += p.vx;
+          p.y += p.vy;
+          p.rot += p.spin;
+          p.life -= 1;
+          const alive = p.life > 0 && p.y < confettiCanvas.height + 40;
+          if (alive){
+            confettiCtx.save();
+            confettiCtx.translate(p.x, p.y);
+            confettiCtx.rotate(p.rot);
+            confettiCtx.fillStyle = p.color;
+            confettiCtx.fillRect(-p.size/2, -p.size/2, p.size, p.size * 0.65);
+            confettiCtx.restore();
+          }
+          return alive;
+        });
+        if (confettiPieces.length){
+          requestAnimationFrame(tick);
+        }else{
+          confettiLoopRunning = false;
+          confettiCtx.clearRect(0,0,confettiCanvas.width,confettiCanvas.height);
+        }
+      };
+      requestAnimationFrame(tick);
+    }
+ 
+    function normalizeNoteGroup(group){
+      if (!group) return null;
+      const notes = Array.isArray(group.notes) && group.notes.length
+        ? group.notes.map((n, idx) => ({
+            id: n.id || uid(),
+            title: n.title || `Page ${idx + 1}`,
+            content: n.content || '',
+            updatedAt: n.updatedAt || Date.now(),
+            stickers: Array.isArray(n.stickers) ? n.stickers : []
+          }))
+        : [{ id: uid(), title: 'Page 1', content: '', updatedAt: Date.now(), stickers: [] }];
+
+      return {
+        id: group.id || uid(),
+        name: group.name || 'Notes',
+        characterId: group.characterId || '',
+        themeCharacters: group.themeCharacters || {},
+        lastSpeech: group.lastSpeech || null,
+        notes
+      };
+    }
+
+    function buildState(parsed){
+      const raw = parsed || {};
+      return {
+        ...structuredClone(defaultData),
+        ...raw,
+        profile: { ...defaultData.profile, ...(raw.profile || {}) },
+        settings: { ...defaultData.settings, ...(raw.settings || {}) },
+        stats: { ...defaultData.stats, ...(raw.stats || {}) },
+        activeTab: raw.activeTab || defaultData.activeTab,
+        activeWeekId: raw.activeWeekId || defaultData.activeWeekId,
+        activeCharacterId: raw.activeCharacterId || defaultData.activeCharacterId,
+        activeThemeId: raw.activeThemeId || defaultData.activeThemeId,
+        activeNoteGroupId: raw.activeNoteGroupId || defaultData.activeNoteGroupId,
+        activeNoteId: raw.activeNoteId || defaultData.activeNoteId,
+        weeks: Array.isArray(raw.weeks)
+          ? raw.weeks.map(w => ({
+              xp: 0,
+              lastSpeech: null,
+              weekBonusAwarded: false,
+              priorities: [],
+              themeCharacters: w.themeCharacters || {},
+              ...w,
+              tasks: Array.isArray(w.tasks)
+                ? w.tasks.map(t => ({
+                    id: t.id || uid(),
+                    text: t.text || '',
+                    done: !!t.done,
+                    xpAwarded: !!t.xpAwarded,
+                    date: t.date || ''
+                  }))
+                : [],
+              priorities: Array.isArray(w.priorities)
+                ? w.priorities.map(p => (typeof p === 'string'
+                    ? { id: uid(), text: p, done: false, xpAwarded: false, date: '' }
+                    : {
+                        id: p.id || uid(),
+                        text: p.text || '',
+                        done: !!p.done,
+                        xpAwarded: !!p.xpAwarded,
+                        date: p.date || ''
+                      }))
+                : []
+            }))
+          : structuredClone(defaultData.weeks),
+        characters: Array.isArray(raw.characters) ? raw.characters.map(c => ({
+          id: c.id || uid(),
+          name: c.name || 'Character',
+          sprite: c.sprite || '',
+          mode: c.mode || 'bubble',
+          bounce: c.bounce === false ? false : true,
+          bubbleOpen: Array.isArray(c.bubbleOpen) ? c.bubbleOpen : (c.bubbleOpen ? [c.bubbleOpen] : []),
+          bubbleAdd: Array.isArray(c.bubbleAdd) ? c.bubbleAdd : (c.bubbleAdd ? [c.bubbleAdd] : []),
+          bubbleDone: Array.isArray(c.bubbleDone) ? c.bubbleDone : (c.bubbleDone ? [c.bubbleDone] : []),
+          bubbleWeek: Array.isArray(c.bubbleWeek) ? c.bubbleWeek : (c.bubbleWeek ? [c.bubbleWeek] : []),
+          voiceOpen: Array.isArray(c.voiceOpen) ? c.voiceOpen : (c.voiceOpen ? [c.voiceOpen] : []),
+          voiceAdd: Array.isArray(c.voiceAdd) ? c.voiceAdd : (c.voiceAdd ? [c.voiceAdd] : []),
+          voiceDone: Array.isArray(c.voiceDone) ? c.voiceDone : (c.voiceDone ? [c.voiceDone] : []),
+          voiceWeek: Array.isArray(c.voiceWeek) ? c.voiceWeek : (c.voiceWeek ? [c.voiceWeek] : [])
+        })) : [],
+        themes: Array.isArray(raw.themes)
+          ? raw.themes.map(t => ({
+              id: t.id || uid(),
+              name: t.name || 'Theme',
+              backgroundImage: t.backgroundImage || '',
+              icon: t.icon || '',
+              accent: t.accent || (raw.settings && raw.settings.accent) || defaultData.settings.accent,
+              characterIds: Array.isArray(t.characterIds) ? t.characterIds : []
+            }))
+          : structuredClone(defaultData.themes),
+        notes: Array.isArray(raw.notes) ? raw.notes.map(normalizeNoteGroup) : [],
+        stickers: Array.isArray(raw.stickers) ? raw.stickers.map(s => ({
+          id: s.id || uid(),
+          name: s.name || 'Sticker',
+          src: s.src || ''
+        })) : []
+      };
+    }
+
+    function initDB() {
+      return new Promise((resolve, reject) => {
+        const req = indexedDB.open(DB_NAME, 1);
+        req.onupgradeneeded = e => {
+          if (!e.target.result.objectStoreNames.contains(STORE_NAME)) {
+            e.target.result.createObjectStore(STORE_NAME);
+          }
+        };
+        req.onsuccess = e => resolve(e.target.result);
+        req.onerror = () => reject('DB Error');
+      });
+    }
+
+    async function loadData() {
+      try {
+        const db = await initDB();
+        const tx = db.transaction(STORE_NAME, 'readonly');
+        const req = tx.objectStore(STORE_NAME).get('appState');
+        const raw = await new Promise((resolve, reject) => {
+          req.onsuccess = () => resolve(req.result);
+          req.onerror = () => reject();
+        });
+        state = buildState(raw);
+      } catch {
+        state = buildState(null);
+      }
+      renderAll();
+    }
+
+    async function save(silent = false, skipRender = false) {
+      try {
+        const db = await initDB();
+        const tx = db.transaction(STORE_NAME, 'readwrite');
+        tx.objectStore(STORE_NAME).put(state, 'appState');
+        await new Promise((resolve, reject) => {
+          tx.oncomplete = resolve;
+          tx.onerror = reject;
+        });
+        if (!silent) toast('Saved');
+        if (!skipRender) renderAll();
+      } catch (err) {
+        console.error(err);
+        if(!silent) alert('Save failed. Database storage issue.');
+      }
+    }
+ 
+    function navigateTo(tab, hash){
+      state.activeTab = tab;
+      const targetHash = hash || `#${tab}`;
+      if (location.hash !== targetHash){
+        location.hash = targetHash;
+      } else {
+        renderAll();
+      }
+    }
+ 
+    function goToToDoList(){
+      navigateTo('schedule', '#schedule');
+    }
+ 
+    function toast(text){
+      const el = document.getElementById('toast');
+      if (el) {
+          el.textContent = text;
+          el.style.display = 'block';
+          clearTimeout(window.__toastTimer);
+          window.__toastTimer = setTimeout(() => el.style.display = 'none', 1300);
+      }
+    }
+ 
+    function currentWeek(){
+      return state.weeks.find(w => w.id === state.activeWeekId) || state.weeks[0] || null;
+    }
+ 
+    function currentCharacter(){
+      const theme = currentTheme();
+      const filtered = (theme && state.themes.length > 0)
+        ? state.characters.filter(c => theme.characterIds && theme.characterIds.includes(c.id))
+        : state.characters;
+      return filtered.find(c => c.id === state.activeCharacterId) || filtered[0] || null;
+    }
+ 
+    function currentTheme(){
+      return state.themes.find(t => t.id === state.activeThemeId) || state.themes[0] || null;
+    }
+ 
+    function renderBrandLogo(){
+      const el = document.querySelector('.brand-icon');
+      if (!el) return;
+      const theme = currentTheme();
+      if (theme && theme.icon){
+        el.innerHTML = `<img src="${theme.icon}" alt="ToDimension logo">`;
+        el.style.background = 'rgba(255,255,255,.25)';
+        el.style.color = 'transparent';
+      } else {
+        el.innerHTML = 'TD';
+        el.style.background = 'linear-gradient(135deg,var(--accent),var(--accent-2))';
+        el.style.color = '#fff';
+      }
+    }
+ 
+    function escapeHtml(str = ''){
+      return String(str)
+        .replaceAll('&','&amp;')
+        .replaceAll('<','&lt;')
+        .replaceAll('>','&gt;')
+        .replaceAll('"','&quot;')
+        .replaceAll("'",'&#039;');
+    }
+ 
+    function lighten(hex, amount = 0.2){
+      const h = String(hex || '#8b7cf6').replace('#','');
+      const n = h.length === 3 ? h.split('').map(x => x + x).join('') : h.padEnd(6,'0').slice(0,6);
+      const num = parseInt(n, 16);
+      let r = (num >> 16) & 255;
+      let g = (num >> 8) & 255;
+      let b = num & 255;
+      r = Math.min(255, Math.round(r + (255-r) * amount));
+      g = Math.min(255, Math.round(g + (255-g) * amount));
+      b = Math.min(255, Math.round(b + (255-b) * amount));
+      return '#' + [r,g,b].map(v => v.toString(16).padStart(2,'0')).join('');
+    }
+ 
+async function readFileAsDataURL(file){
+  if (!file) return '';
+ 
+  const readRaw = () => new Promise(resolve => {
+    const fr = new FileReader();
+    fr.onload = () => resolve(fr.result);
+    fr.readAsDataURL(file);
+  });
+ 
+  if (file.type && file.type.startsWith('image/')){
+    const dataURL = await readRaw();
+    const img = await new Promise((resolve, reject) => {
+      const image = new Image();
+      image.onload = () => resolve(image);
+      image.onerror = reject;
+      image.src = dataURL;
+    });
+ 
+    const maxSide = 1200;
+    const scale = Math.min(1, maxSide / Math.max(img.width, img.height));
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.max(1, Math.round(img.width * scale));
+    canvas.height = Math.max(1, Math.round(img.height * scale));
+ 
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+ 
+    if (file.type === 'image/png' || file.type === 'image/webp') {
+      return canvas.toDataURL(file.type);
+    }
+    return canvas.toDataURL('image/jpeg', 0.78);
+  }
+ 
+  return readRaw();
+}
+ 
+function stopSpeechMotion(){
+  currentSpeechActive = false;
+  clearTimeout(currentSpeechTimer);
+  currentSpeechTimer = null;
+  const bubble = document.getElementById('weekPageCharacterBubble');
+  const img = document.getElementById('weekPageCharacterImg');
+  if (bubble) bubble.classList.remove('bounce');
+  if (img) img.classList.remove('bounce');
+}
+ 
+function holdSpeechMotion(duration = 3000){
+  currentSpeechActive = true;
+  clearTimeout(currentSpeechTimer);
+  currentSpeechTimer = setTimeout(() => {
+    stopSpeechMotion();
+  }, duration);
+}
+ 
+function fallbackAvatar(){
+  return 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120">
+      <rect width="100%" height="100%" rx="28" fill="#ece7ff"/>
+      <text x="50%" y="52%" dominant-baseline="middle" text-anchor="middle" fill="#7467d9" font-family="Arial" font-size="38">?</text>
+    </svg>`
+  );
+}
+
+function getWeekLine(character, type){
+  const defaults = {
+    open:'Hello! Let’s start this week.',
+    add:'New task added.',
+    done:'Nice work — task complete!',
+    week:'Great job! You finished the week.'
+  };
+
+  const map = {
+    open:'bubbleOpen',
+    add:'bubbleAdd',
+    done:'bubbleDone',
+    week:'bubbleWeek'
+  };
+
+  const arr = character && character[map[type]] ? character[map[type]] : [];
+  const candidates = Array.isArray(arr)
+    ? arr.map(s => String(s || '').trim()).filter(Boolean)
+    : (arr ? [String(arr).trim()] : []);
+
+  if (candidates.length) return candidates[Math.floor(Math.random() * candidates.length)];
+  return defaults[type];
+}
+
+function playVoice(character, type){
+  const map = {
+    open:'voiceOpen',
+    add:'voiceAdd',
+    done:'voiceDone',
+    week:'voiceWeek'
+  };
+
+  const arr = character && character[map[type]] ? character[map[type]] : [];
+  const candidates = Array.isArray(arr) ? arr.filter(Boolean) : (arr ? [arr] : []);
+  if (!candidates.length) return null;
+
+  try{
+    stopCurrentVoice();
+
+    const src = candidates[Math.floor(Math.random() * candidates.length)];
+    currentVoiceAudio = new Audio(src);
+
+    currentVoiceAudio.onended = () => {
+      stopSpeechMotion();
+      currentVoiceAudio = null;
+    };
+
+    currentVoiceAudio.onerror = () => {
+      stopSpeechMotion();
+      currentVoiceAudio = null;
+    };
+
+    const playPromise = currentVoiceAudio.play();
+    if (playPromise && typeof playPromise.catch === 'function') {
+      playPromise.catch(() => {
+        currentVoiceAudio = null;
+      });
+    }
+
+    return currentVoiceAudio;
+  }catch{
+    currentVoiceAudio = null;
+    return null;
+  }
+}
+
+function getWeekCharacter(week){
+  if (!week) return null;
+  const theme = currentTheme();
+  let charId = week.characterId;
+  if (theme) {
+    if (!week.themeCharacters) week.themeCharacters = {};
+    if (week.themeCharacters[theme.id] !== undefined) {
+      charId = week.themeCharacters[theme.id];
+    }
+  }
+  return state.characters.find(c => c.id === charId) || null;
+}
+
+function getNoteGroupCharacter(group){
+  if (!group) return null;
+  const theme = currentTheme();
+  let charId = group.characterId;
+  if (theme) {
+    if (!group.themeCharacters) group.themeCharacters = {};
+    if (group.themeCharacters[theme.id] !== undefined) {
+      charId = group.themeCharacters[theme.id];
+    }
+  }
+  return state.characters.find(c => c.id === charId) || null;
+}
+  
+
+function weekItemCount(week){
+  const taskCount = Array.isArray(week && week.tasks) ? week.tasks.length : 0;
+  const priorityCount = Array.isArray(week && week.priorities) ? week.priorities.length : 0;
+  return taskCount + priorityCount;
+}
+ 
+function weekDoneCount(week){
+  const doneTasks = Array.isArray(week && week.tasks) ? week.tasks.filter(t => t.done).length : 0;
+  const donePriorities = Array.isArray(week && week.priorities)
+    ? week.priorities.filter(p => (typeof p === 'string' ? false : (p && p.done))).length
+    : 0;
+  return doneTasks + donePriorities;
+}
+ 
+function weekPercent(week){
+  const total = weekItemCount(week);
+  const done = weekDoneCount(week);
+  return total ? Math.round((done / total) * 100) : 0;
+}
+ 
+function awardItemXp(week, item){
+  if (!item || item.xpAwarded || !item.done) return false;
+  item.xpAwarded = true;
+  week.xp = (week && week.xp ? week.xp : 0) + 10;
+  state.stats.totalXP += 10;
+  state.stats.tasksCompleted += 1;
+  return true;
+}
+ 
+function awardWeekBonus(week){
+  if (!week || week.weekBonusAwarded) return false;
+  const tasksDone = Array.isArray(week.tasks) ? week.tasks.every(t => t.done) : true;
+  const prioritiesDone = Array.isArray(week.priorities)
+    ? week.priorities.every(p => (typeof p === 'string' ? false : (p && p.done)))
+    : true;
+  const complete = weekItemCount(week) > 0 && tasksDone && prioritiesDone;
+  if (!complete) return false;
+  week.weekBonusAwarded = true;
+  week.xp = (week && week.xp ? week.xp : 0) + 100;
+  state.stats.totalXP += 100;
+  state.stats.weeksCompleted += 1;
+  return true;
+}
+ 
+function updateWeekSpeech(week, type){
+  const character = getWeekCharacter(week);
+  if (!character) return;
+  const text = getWeekLine(character, type);
+  week.lastSpeech = { type, text, time: Date.now() };
+  const bubble = document.getElementById('weekPageCharacterBubble');
+  const img = document.getElementById('weekPageCharacterImg');
+ 
+  if (state.activeTab === 'week' && state.activeWeekId === week.id && bubble){
+    const bounceOn = character.bounce !== false;
+ 
+    if (character.mode === 'voice'){
+      bubble.textContent = '';
+      bubble.classList.add('hidden');
+    } else {
+      bubble.textContent = text;
+      bubble.classList.remove('hidden');
+      bubble.classList.toggle('bounce', bounceOn);
+    }
+ 
+    if (img && bounceOn) img.classList.add('bounce');
+  }
+ 
+  const audio = playVoice(character, type);
+  if (audio){
+    currentSpeechActive = true;
+    clearTimeout(currentSpeechTimer);
+    const fallbackMs = Math.max(2500, Math.min(6000, Math.round((audio.duration || 3.2) * 1000) + 120));
+    currentSpeechTimer = setTimeout(() => stopSpeechMotion(), fallbackMs);
+  } else {
+    holdSpeechMotion(character.mode === 'voice' ? 2500 : 3000);
+  }
+ 
+  if (state.activeTab === 'week' && state.activeWeekId === week.id){
+    const bubbleEl = document.getElementById('weekPageCharacterBubble');
+    const imgEl = document.getElementById('weekPageCharacterImg');
+    if (bubbleEl && character.mode !== 'voice'){
+      clearTimeout(window.__weekBubbleTimer);
+      window.__weekBubbleTimer = setTimeout(() => {
+        bubbleEl.textContent = '';
+        bubbleEl.classList.add('hidden');
+        bubbleEl.classList.remove('bounce');
+        if (imgEl) imgEl.classList.remove('bounce');
+        if (!currentVoiceAudio || currentVoiceAudio.ended || currentVoiceAudio.paused) {
+          stopSpeechMotion();
+        }
+      }, 3000);
+    }
+  }
+}
+ 
+function checkWeekCompletion(week){
+  if (!week) return;
+  const nowComplete = weekItemCount(week) > 0
+    && Array.isArray(week.tasks) && week.tasks.every(t => t.done)
+    && (!Array.isArray(week.priorities) || week.priorities.every(p => (typeof p === 'string' ? false : (p && p.done))));
+  if (!nowComplete) return;
+  const earned = awardWeekBonus(week);
+  if (earned){
+    burstConfetti(window.innerWidth - 120, window.innerHeight - 120, 140, 12);
+    updateWeekSpeech(week, 'week');
+    toast('+100 XP');
+  }
+}
+ 
+    function applyAppearance(){
+      const root = document.documentElement;
+      const theme = currentTheme();
+      const accent = (theme && theme.accent) ? theme.accent : (state.settings.accent || '#8b7cf6');
+      root.style.setProperty('--accent', accent);
+      root.style.setProperty('--accent-2', lighten(accent, .22));
+      document.body.dataset.mode = state.settings.mode === 'system'
+        ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+        : state.settings.mode;
+ 
+      renderBrandLogo();
+      const shell = document.getElementById('appShell');
+      if (theme && theme.backgroundImage){
+        shell.style.backgroundImage = `linear-gradient(180deg, rgba(0,0,0,.06), rgba(0,0,0,.06)), url(${theme.backgroundImage})`;
+        shell.style.backgroundSize = 'cover';
+        shell.style.backgroundAttachment = 'fixed';
+      }else{
+        shell.style.backgroundImage = '';
+      }
+ 
+      document.body.classList.toggle('week-open', state.activeTab === 'week');
+    }
+ 
+    function weekTitle(week){
+      return week ? week.name : 'No week selected';
+    }
+ 
+    function getStats(){
+      const totalXP = state.stats.totalXP || 0;
+      const level = Math.floor(totalXP / 100) + 1;
+      const levelProgress = totalXP % 100;
+      const bestWeekPercent = state.weeks.reduce((m, w) => Math.max(m, weekPercent(w)), 0);
+      const maxTasksInWeek = state.weeks.reduce((m, w) => Math.max(m, weekDoneCount(w)), 0);
+      return {
+        totalXP,
+        tasksCompleted: state.stats.tasksCompleted || 0,
+        weeksCompleted: state.stats.weeksCompleted || 0,
+        bestWeekPercent,
+        maxTasksInWeek,
+        level,
+        levelProgress
+      };
+    }
+ 
+    function renderSidebar(){
+      const p = state.profile || {};
+      document.getElementById('profileName').textContent = p.username || 'Your Name';
+      document.getElementById('profileMeta').textContent = 'Custom to-do worlds';
+      document.getElementById('profilePreview').src = p.pfp || fallbackAvatar();
+      renderBrandLogo();
+    }
+ 
+    function renderSchedule(){
+      if (!state.activeWeekId && state.weeks[0]) state.activeWeekId = state.weeks[0].id;
+      const list = document.getElementById('weeksList');
+      const week = currentWeek();
+ 
+      list.innerHTML = state.weeks.map(w => {
+        const percent = weekPercent(w);
+        const char = getWeekCharacter(w);
+        return `
+          <div class="weekCard ${w.id === state.activeWeekId ? 'active' : ''}">
+            <div class="weekHead">
+              <strong>${escapeHtml(w.name)}</strong>
+              <div class="toolbar" style="margin:0;">
+                <button class="iconBtn" onclick="openWeek('${w.id}')">Open</button>
+                <button class="iconBtn" onclick="selectWeekToEdit('${w.id}')">Edit</button>
+                <button class="iconBtn" onclick="deleteWeek('${w.id}')">Remove</button>
+              </div>
+            </div>
+            <div class="small">${char ? 'Character: ' + escapeHtml(char.name) : 'Assign a character'}</div>
+            <div class="progress"><div style="width:${percent}%"></div></div>
+            <div class="small">${weekDoneCount(w)}/${weekItemCount(w)} tasks complete · XP ${w.xp || 0}</div>
+          </div>
+        `;
+      }).join('') || `<div class="muted">No weeks yet. Add your first one.</div>`;
+ 
+      const editor = week || { name:'', tasks:[], xp:0 };
+      document.getElementById('weekNameInput').value = editor.name || '';
+      const assignedChar = editor ? getWeekCharacter(editor) : null;
+      renderWeekCharacterOptions('weekCharacterSelect', assignedChar ? assignedChar.id : '');
+    }
+
+    window.selectWeekToEdit = function(id){
+      state.activeWeekId = id;
+      renderSchedule();
+    };
+
+// TOGGLE FLOATING CALENDAR
+window.toggleWeekCalendar = function() {
+    const cal = document.getElementById('weekFloatingCalendar');
+    if (!cal) return;
+    if (cal.style.display === 'none') {
+        cal.style.display = 'block';
+        const grid = document.getElementById('weekPageActualCalendarGrid');
+        if(grid) grid.innerHTML = generateActualCalendarHTML(true);
+    } else {
+        cal.style.display = 'none';
+    }
+};
+ 
+function renderWeekPage(){
+  const week = currentWeek();
+  const char = getWeekCharacter(week);
+ 
+  document.getElementById('weekPageTitle').textContent = week ? week.name : 'Week/Day';
+  document.getElementById('weekPageProgressPill').textContent = `${weekPercent(week)}% complete`;
+  document.getElementById('weekPageXpPill').textContent = `XP earned: ${week && week.xp ? week.xp : 0}`;
+ 
+  renderWeekTasks(week, 'weekPageTasksList');
+  renderWeekProgress(week, 'weekPageProgressFill', 'weekPageProgressText');
+ 
+  const priorityList = document.getElementById('weekPagePriorityList');
+  if (priorityList){
+    const priorities = Array.isArray(week && week.priorities) ? week.priorities : [];
+    priorityList.innerHTML = priorities.map((item, i) => {
+      const priority = typeof item === 'string' ? { text:item, done:false, date:'' } : item;
+      const checked = (priority && priority.done) ? 'checked' : '';
+      const doneStyle = (priority && priority.done) ? 'text-decoration:line-through; opacity:.65;' : '';
+      const dateBadge = (priority && priority.date) ? `<br><small class="muted" style="color:var(--danger)">📅 Due: ${priority.date}</small>` : '';
+      return `
+        <div class="taskItem" style="align-items:flex-start;">
+          <label style="align-items:flex-start; padding-top:2px;">
+            <input type="checkbox" ${checked} onchange="toggleWeekPriority('${week.id}', ${i})">
+            <div style="${doneStyle}">
+                ${escapeHtml(priority ? priority.text : '')}
+                ${dateBadge}
+            </div>
+          </label>
+          <button class="iconBtn" onclick="removeWeekPriority('${week.id}', ${i})">✕</button>
+        </div>
+      `;
+    }).join('') || '<div class="muted">No priorities yet.</div>';
+  }
+ 
+  const img = document.getElementById('weekPageCharacterImg');
+  const name = document.getElementById('weekPageCharacterName');
+  const meta = document.getElementById('weekPageCharacterMeta');
+  const bubble = document.getElementById('weekPageCharacterBubble');
+  const speechActive = !!currentSpeechActive && state.activeWeekId === (week ? week.id : '');
+  const dock = document.querySelector('#weekView .companionStage');
+ 
+  if (char){
+    if (dock) dock.style.display = 'flex';
+    if(name) name.textContent = char.name || 'Character';
+    if(meta) meta.textContent = `${char.mode || 'bubble'} mode`;
+    if(img) img.src = char.sprite || fallbackAvatar();
+ 
+    const speechAge = (week && week.lastSpeech) ? Date.now() - week.lastSpeech.time : Infinity;
+    const shouldShowSpeech = speechActive || speechAge < 7000;
+ 
+    if (shouldShowSpeech && char.mode !== 'voice' && (week && week.lastSpeech && week.lastSpeech.text)){
+      if(bubble) {
+         bubble.textContent = week.lastSpeech.text;
+         bubble.classList.remove('hidden');
+      }
+    } else {
+      if(bubble) {
+         bubble.textContent = '';
+         bubble.classList.add('hidden');
+      }
+    }
+ 
+    const bounceOn = !!(char.bounce !== false && shouldShowSpeech);
+    if(img) img.classList.toggle('bounce', bounceOn);
+    if(bubble) bubble.classList.toggle('bounce', bounceOn && char.mode !== 'voice');
+  } else {
+    if (dock) dock.style.display = 'none';
+  }
+
+  // Refresh floating calendar if it's currently open
+  const floatingCal = document.getElementById('weekFloatingCalendar');
+  if (floatingCal && floatingCal.style.display !== 'none') {
+      const calGrid = document.getElementById('weekPageActualCalendarGrid');
+      if (calGrid) calGrid.innerHTML = generateActualCalendarHTML(true);
+  }
+}
+ 
+    function renderAchievements(){
+      const stats = getStats();
+ 
+      document.getElementById('statsGrid').innerHTML = `
+        <div class="statCard">
+          <strong>Total XP</strong>
+          <div style="font-size:28px;font-weight:800;margin-top:6px;">${stats.totalXP}</div>
+          <div class="small">Level ${stats.level}</div>
+          <div class="progress" style="margin-top:10px;"><div style="width:${stats.levelProgress}%"></div></div>
+        </div>
+        <div class="statCard">
+          <strong>Tasks completed</strong>
+          <div style="font-size:28px;font-weight:800;margin-top:6px;">${stats.tasksCompleted}</div>
+          <div class="small">Saved permanently</div>
+        </div>
+        <div class="statCard">
+          <strong>Weeks completed</strong>
+          <div style="font-size:28px;font-weight:800;margin-top:6px;">${stats.weeksCompleted}</div>
+          <div class="small">Big weekly wins</div>
+        </div>
+        <div class="statCard">
+          <strong>Best week</strong>
+          <div style="font-size:28px;font-weight:800;margin-top:6px;">${stats.bestWeekPercent}%</div>
+          <div class="small">Highest completion so far</div>
+        </div>
+      `;
+ 
+      document.getElementById('goalsList').innerHTML = ACHIEVEMENTS.map(a => {
+        const current = stats[a.key] || 0;
+        const progress = Math.min(current / a.target, 1);
+        const done = current >= a.target;
+        return `
+          <div class="goalItem ${done ? '' : 'locked'}">
+            <div class="achievementTop">
+              <div>
+                <strong>${escapeHtml(a.title)}</strong>
+                <div class="small">${escapeHtml(a.desc)}</div>
+              </div>
+              <div class="pill">${done ? 'Unlocked' : Math.round(progress * 100) + '%'}</div>
+            </div>
+            <div class="progress"><div style="width:${Math.round(progress * 100)}%"></div></div>
+          </div>
+        `;
+      }).join('');
+ 
+      document.getElementById('weekXpList').innerHTML = state.weeks.map(w => {
+        const percent = weekPercent(w);
+        const char = getWeekCharacter(w);
+        return `
+          <div class="achievementItem">
+            <div class="achievementTop">
+              <div>
+                <strong>${escapeHtml(w.name)}</strong>
+                <div class="small">${char ? 'Character: ' + escapeHtml(char.name) : 'No character assigned'}</div>
+              </div>
+              <div class="pill">XP ${w.xp || 0}</div>
+            </div>
+            <div class="progress"><div style="width:${percent}%"></div></div>
+            <div class="small">${weekDoneCount(w)}/${weekItemCount(w)} tasks complete</div>
+          </div>
+        `;
+      }).join('') || `<div class="muted">No weeks yet.</div>`;
+    }
+ 
+    function renderCharacters(){
+      const theme = currentTheme();
+      const filteredCharacters = (theme && state.themes.length > 0)
+        ? state.characters.filter(c => theme.characterIds && theme.characterIds.includes(c.id))
+        : state.characters;
+
+      if (!filteredCharacters.some(c => c.id === state.activeCharacterId)) {
+        state.activeCharacterId = filteredCharacters.length > 0 ? filteredCharacters[0].id : '';
+      }
+
+      const list = document.getElementById('charactersList');
+      const character = filteredCharacters.find(c => c.id === state.activeCharacterId) || null;
+ 
+      list.innerHTML = filteredCharacters.map(c => `
+        <div class="miniCard ${c.id === state.activeCharacterId ? 'active' : ''}">
+          <div class="cardHead">
+            <strong>${escapeHtml(c.name)}</strong>
+            <div class="toolbar" style="margin:0;">
+              <button class="iconBtn" onclick="editCharacter('${c.id}')">Edit</button>
+              <button class="iconBtn" onclick="deleteCharacter('${c.id}')">Remove</button>
+            </div>
+          </div>
+          <div class="small">${c.mode || 'bubble'} · ${c.bounce === false ? 'no bounce' : 'bounce on'}</div>
+        </div>
+      `).join('') || `<div class="muted">No characters linked to this theme yet. Add one on the right or manage links under Themes.</div>`;
+ 
+      fillCharacterForm(character);
+      renderCharacterPreview();
+    }
+ 
+    function fillCharacterForm(c){
+      const ch = c || { name:'', mode:'bubble', bounce:true, bubbleOpen:[], bubbleAdd:[], bubbleDone:[], bubbleWeek:[], sprite:'', voiceOpen:[], voiceAdd:[], voiceDone:[], voiceWeek:[] };
+      document.getElementById('characterEditorTitle').textContent = c ? 'Editing: ' + c.name : 'Character editor';
+      document.getElementById('characterNameInput').value = ch.name || '';
+      document.getElementById('characterModeInput').value = ch.mode || 'bubble';
+      document.getElementById('characterBounceInput').value = ch.bounce === false ? 'off' : 'on';
+ 
+      const setVal = (id, arr, idx) => { const el = document.getElementById(id); if (!el) return; el.value = (Array.isArray(arr) && arr[idx]) ? arr[idx] : ''; };
+ 
+      setVal('charBubbleOpen1', ch.bubbleOpen, 0);
+      setVal('charBubbleOpen2', ch.bubbleOpen, 1);
+      setVal('charBubbleOpen3', ch.bubbleOpen, 2);
+ 
+      setVal('charBubbleAdd1', ch.bubbleAdd, 0);
+      setVal('charBubbleAdd2', ch.bubbleAdd, 1);
+      setVal('charBubbleAdd3', ch.bubbleAdd, 2);
+ 
+      setVal('charBubbleDone1', ch.bubbleDone, 0);
+      setVal('charBubbleDone2', ch.bubbleDone, 1);
+      setVal('charBubbleDone3', ch.bubbleDone, 2);
+ 
+      setVal('charBubbleWeek1', ch.bubbleWeek, 0);
+      setVal('charBubbleWeek2', ch.bubbleWeek, 1);
+      setVal('charBubbleWeek3', ch.bubbleWeek, 2);
+ 
+      const img = document.getElementById('characterPreviewImg');
+      if(img) img.src = ch.sprite || fallbackAvatar();
+
+      const fileInputs = ['characterSpriteInput', 'charVoiceOpen', 'charVoiceAdd', 'charVoiceDone', 'charVoiceWeek'];
+      fileInputs.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+      });
+    }
+ 
+    function renderCharacterPreview(){
+      const name = document.getElementById('characterNameInput').value || 'Preview';
+      const mode = document.getElementById('characterModeInput').value;
+      const bounce = document.getElementById('characterBounceInput').value !== 'off';
+ 
+      const lines = ['charBubbleOpen1','charBubbleOpen2','charBubbleOpen3']
+        .map(id => { const el = document.getElementById(id); return el ? el.value.trim() : ''; })
+        .filter(Boolean);
+      const bubble = lines.length ? lines[Math.floor(Math.random() * lines.length)] : 'Hello.';
+ 
+      document.getElementById('characterPreviewName').textContent = name;
+      document.getElementById('characterPreviewMode').textContent = mode + ' mode';
+      document.getElementById('characterPreviewBubble').textContent = bubble;
+      document.getElementById('characterPreviewBubble').classList.toggle('bounce', bounce);
+      document.getElementById('characterPreviewImg').classList.toggle('bounce', bounce);
+ 
+      const img = document.getElementById('characterPreviewImg');
+      if (img && !img.src) img.src = fallbackAvatar();
+    }
+
+    function currentNoteGroup(){
+      return state.notes.find(g => g.id === state.activeNoteGroupId) || state.notes[0] || null;
+    }
+
+    function currentNote(){
+      const group = currentNoteGroup();
+      if (!group || !Array.isArray(group.notes)) return null;
+      return group.notes.find(n => n.id === state.activeNoteId) || group.notes[0] || null;
+    }
+
+    function openNoteGroup(id){
+      const group = state.notes.find(g => g.id === id);
+      if (!group) return;
+
+      state.activeNoteGroupId = id;
+      const normalized = currentNoteGroup();
+      if (normalized && (!state.activeNoteId || !normalized.notes.some(n => n.id === state.activeNoteId))){
+        state.activeNoteId = (normalized.notes[0] ? normalized.notes[0].id : '');
+      }
+
+      if (normalized) updateNoteSpeech(normalized, 'open');
+      navigateTo('noteEditor', `#note-${id}`);
+      save(true);
+    }
+
+    window.selectNoteGroupToEdit = function(id) {
+      state.activeNoteGroupId = id;
+      renderNotes();
+    }
+
+    function addNoteGroup(){
+      const name = prompt('Note group name?', `Notes ${state.notes.length + 1}`);
+      if (!name) return;
+
+      const group = {
+        id: uid(),
+        name,
+        characterId: '',
+        themeCharacters: {},
+        notes: [{ id: uid(), title: 'Page 1', content: '', updatedAt: Date.now(), stickers: [] }]
+      };
+
+      state.notes.push(group);
+      state.activeNoteGroupId = group.id;
+      state.activeNoteId = group.notes[0].id;
+
+      navigateTo('noteEditor', `#note-${group.id}`);
+      save(true);
+    }
+
+    function saveNoteGroup(){
+      const group = currentNoteGroup();
+      if (!group) return;
+
+      const input = document.getElementById('noteGroupNameInput');
+      const charSel = document.getElementById('noteGroupCharacterSelect');
+      if (input) group.name = input.value.trim() || group.name;
+      if (charSel) {
+        const theme = currentTheme();
+        if (theme) {
+          if (!group.themeCharacters) group.themeCharacters = {};
+          group.themeCharacters[theme.id] = charSel.value || '';
+        } else {
+          group.characterId = charSel.value || '';
+        }
+      }
+      save(true);
+    }
+
+    function deleteNoteGroup(id){
+      if (!confirm('Remove this note group?')) return;
+
+      state.notes = state.notes.filter(g => g.id !== id);
+
+      if (state.activeNoteGroupId === id){
+        state.activeNoteGroupId = (state.notes[0] ? state.notes[0].id : '');
+        state.activeNoteId = (state.notes[0] && state.notes[0].notes && state.notes[0].notes[0] ? state.notes[0].notes[0].id : '');
+      }
+
+      if (state.activeTab === 'noteEditor') navigateTo('notes', '#notes');
+      save(true);
+    }
+
+    function addNote(){
+      const group = currentNoteGroup();
+      if (!group) return;
+
+      if (!Array.isArray(group.notes) || !group.notes.length){
+        group.notes = [{ id: uid(), title: 'Page 1', content: '', updatedAt: Date.now(), stickers: [] }];
+        state.activeNoteId = group.notes[0].id;
+        renderNoteEditor();
+        save(true);
+        return;
+      }
+
+      const currentId = state.activeNoteId || group.notes[0].id;
+      const currentIndex = Math.max(0, group.notes.findIndex(n => n.id === currentId));
+      const pageNumber = currentIndex + 2;
+      const note = {
+        id: uid(),
+        title: `Page ${pageNumber}`,
+        content: '',
+        updatedAt: Date.now(),
+        stickers: []
+      };
+
+      group.notes.splice(currentIndex + 1, 0, note);
+      state.activeNoteId = note.id;
+
+      renderNoteEditor();
+      updateNoteSpeech(group, 'add');
+      save(true);
+    }
+
+    function selectNote(id){
+      saveNote(true);
+      state.activeNoteId = id;
+      renderNoteEditor();
+      save(true);
+    }
+
+    function saveNote(skipRender = false){
+      const group = currentNoteGroup();
+      const note = currentNote();
+      if (!group || !note) return null;
+
+      const titleInput = document.getElementById('noteTitleInput');
+      const editor = document.getElementById('noteContentEditor');
+      
+      if (titleInput) note.title = titleInput.value.trim() || note.title;
+      if (editor) note.content = editor.innerHTML || '';
+      note.updatedAt = Date.now();
+      
+      note.stickers = activeStickers ? [...activeStickers] : [];
+
+      save(true, skipRender);
+      return note;
+    }
+
+    function deleteNote(){
+      const group = currentNoteGroup();
+      const note = currentNote();
+      if (!group || !note || !confirm('Remove this page?')) return;
+
+      if (group.notes.length <= 1){
+        group.notes = [{
+          id: uid(),
+          title: 'Page 1',
+          content: '',
+          updatedAt: Date.now(),
+          stickers: []
+        }];
+        state.activeNoteId = group.notes[0].id;
+      }else{
+        group.notes = group.notes.filter(n => n.id !== note.id);
+        state.activeNoteId = (group.notes[0] ? group.notes[0].id : '');
+      }
+
+      renderNoteEditor();
+      save(true);
+    }
+
+    function formatNote(cmd, value = null){
+      const editor = document.getElementById('noteContentEditor');
+      if (!editor) return;
+      editor.focus();
+      document.execCommand(cmd, false, value);
+      saveNote(true);
+    }
+
+    function moveSelectedText(dir) {
+      const sel = window.getSelection();
+      if (!sel.rangeCount) return;
+      let range = sel.getRangeAt(0);
+      let node = sel.anchorNode;
+      if (!node) return;
+      
+      const editor = document.getElementById('noteContentEditor');
+      if (!editor || !editor.contains(node)) return;
+
+      let targetSpan = null;
+      let parent = node.parentElement;
+      
+      if (parent && parent.classList.contains('moved-text-span')) {
+        targetSpan = parent;
+      } else if (sel.toString().length > 0) {
+        const span = document.createElement('span');
+        span.className = 'moved-text-span';
+        span.style.position = 'relative';
+        span.style.top = '0px';
+        try {
+          range.surroundContents(span);
+          targetSpan = span;
+        } catch(e) {
+          let common = range.commonAncestorContainer;
+          if (common.nodeType === Node.TEXT_NODE) common = common.parentElement;
+          if (common !== editor) {
+            targetSpan = common;
+          }
+        }
+      } else {
+        let common = range.commonAncestorContainer;
+        if (common.nodeType === Node.TEXT_NODE) common = common.parentElement;
+        if (common !== editor) {
+          targetSpan = common;
+        }
+      }
+
+      if (targetSpan) {
+        let currentTop = parseInt(targetSpan.style.top || '0');
+        if (isNaN(currentTop)) currentTop = 0;
+        if (targetSpan.style.position !== 'relative') {
+          targetSpan.style.position = 'relative';
+        }
+        currentTop += dir;
+        targetSpan.style.top = currentTop + 'px';
+        saveNote(true);
+      }
+    }
+
+    // Google Docs Equation Helper
+    window.insertMathCmd = function(cmd, e) {
+      if (e) {
+        e.preventDefault(); // Keep focus inside the math element!
+        e.stopPropagation();
+      }
+      const activeMath = window.lastFocusedMathField || document.querySelector('math-field:focus-within');
+      if (activeMath) {
+          activeMath.executeCommand(['insert', cmd]);
+          activeMath.focus();
+          saveNote(true);
+      }
+    };
+
+    function renderNotes(){
+      if (!state.notes.length){
+        state.notes = [normalizeNoteGroup({
+          id: uid(),
+          name: 'Notebook',
+          characterId: '',
+          notes: [{ id: uid(), title: 'Page 1', content: '', updatedAt: Date.now(), stickers: [] }]
+        })];
+      }
+
+      if (!state.activeNoteGroupId && state.notes[0]) state.activeNoteGroupId = state.notes[0].id;
+
+      const list = document.getElementById('noteGroupsList');
+      const group = currentNoteGroup();
+      if (list){
+        list.innerHTML = state.notes.map(g => {
+          const char = getNoteGroupCharacter(g);
+          const noteCount = Array.isArray(g.notes) ? g.notes.length : 0;
+          return `
+            <div class="weekCard ${g.id === state.activeNoteGroupId ? 'active' : ''}">
+              <div class="weekHead">
+                <strong>${escapeHtml(g.name)}</strong>
+                <div class="toolbar" style="margin:0;">
+                  <button class="iconBtn" onclick="openNoteGroup('${g.id}')">Open</button>
+                  <button class="iconBtn" onclick="selectNoteGroupToEdit('${g.id}')">Edit</button>
+                  <button class="iconBtn" onclick="deleteNoteGroup('${g.id}')">Remove</button>
+                </div>
+              </div>
+              <div class="small">${noteCount} page${noteCount === 1 ? '' : 's'}${char ? ' · ' + escapeHtml(char.name) : ''}</div>
+            </div>
+          `;
+        }).join('') || `<div class="muted">No note groups yet. Add one to start writing.</div>`;
+      }
+
+      const input = document.getElementById('noteGroupNameInput');
+      if (input) input.value = (group ? group.name : '');
+      const assignedChar = group ? getNoteGroupCharacter(group) : null;
+      renderNoteCharacterOptions('noteGroupCharacterSelect', assignedChar ? assignedChar.id : '');
+    }
+
+    function updateNoteSpeech(group, type){
+      if (!group) return;
+      const character = getNoteGroupCharacter(group);
+      if (!character) {
+        renderNoteCompanion(group);
+        return;
+      }
+
+      const text = getWeekLine(character, type);
+      group.lastSpeech = { type, text, time: Date.now() };
+
+      const bubble = document.getElementById('notePageCharacterBubble');
+      const img = document.getElementById('notePageCharacterImg');
+
+      if (state.activeTab === 'noteEditor' && state.activeNoteGroupId === group.id && bubble){
+        const bounceOn = character.bounce !== false;
+        if (character.mode === 'voice'){
+          bubble.textContent = '';
+          bubble.classList.add('hidden');
+        }else{
+          bubble.textContent = text;
+          bubble.classList.remove('hidden');
+          bubble.classList.toggle('bounce', bounceOn);
+        }
+        if (img && bounceOn) img.classList.add('bounce');
+      }
+
+      const audio = playVoice(character, type);
+      if (audio){
+        currentSpeechActive = true;
+        clearTimeout(currentSpeechTimer);
+        const fallbackMs = Math.max(2500, Math.min(6000, Math.round((audio.duration || 3.2) * 1000) + 120));
+        currentSpeechTimer = setTimeout(() => stopSpeechMotion(), fallbackMs);
+      }else{
+        holdSpeechMotion(character.mode === 'voice' ? 2500 : 3000);
+      }
+
+      if (state.activeTab === 'noteEditor' && state.activeNoteGroupId === group.id){
+        const bubbleEl = document.getElementById('notePageCharacterBubble');
+        const imgEl = document.getElementById('notePageCharacterImg');
+        if (bubbleEl && character.mode !== 'voice'){
+          clearTimeout(window.__noteBubbleTimer);
+          window.__noteBubbleTimer = setTimeout(() => {
+            bubbleEl.textContent = '';
+            bubbleEl.classList.add('hidden');
+            bubbleEl.classList.remove('bounce');
+            if (imgEl) imgEl.classList.remove('bounce');
+            if (!currentVoiceAudio || currentVoiceAudio.ended || currentVoiceAudio.paused) {
+              stopSpeechMotion();
+            }
+          }, 2800);
+        }
+      }
+    }
+
+    function renderNoteCompanion(group){
+      if (!group) return;
+      const character = getNoteGroupCharacter(group);
+      const img = document.getElementById('notePageCharacterImg');
+      const name = document.getElementById('notePageCharacterName');
+      const meta = document.getElementById('notePageCharacterMeta');
+      const bubble = document.getElementById('notePageCharacterBubble');
+      const speechActive = !!currentSpeechActive && state.activeNoteGroupId === group.id;
+      const dock = document.querySelector('#noteEditorView .noteCompanionStage');
+
+      if (!img || !name || !meta || !bubble) return;
+
+      if (character){
+        if (dock) dock.style.display = 'flex';
+        name.textContent = character.name || 'Character';
+        meta.textContent = `${character.mode || 'bubble'} mode`;
+        img.src = character.sprite || fallbackAvatar();
+
+        const speechAge = group.lastSpeech ? Date.now() - group.lastSpeech.time : Infinity;
+        const shouldShowSpeech = speechActive || speechAge < 7000;
+
+        if (shouldShowSpeech && character.mode !== 'voice' && (group.lastSpeech && group.lastSpeech.text)){
+          bubble.textContent = group.lastSpeech.text;
+          bubble.classList.remove('hidden');
+        }else{
+          bubble.textContent = '';
+          bubble.classList.add('hidden');
+        }
+
+        const bounceOn = !!(character.bounce !== false && shouldShowSpeech);
+        img.classList.toggle('bounce', bounceOn);
+        bubble.classList.toggle('bounce', bounceOn);
+      }else{
+        if (dock) dock.style.display = 'none';
+      }
+    }
+
+    function renderNoteEditor(){
+      const group = currentNoteGroup();
+      if (!group){
+        navigateTo('notes', '#notes');
+        return;
+      }
+
+      if (!Array.isArray(group.notes) || !group.notes.length){
+        group.notes = [{ id: uid(), title: 'Page 1', content: '', updatedAt: Date.now(), stickers: [] }];
+      }
+
+      const note = currentNote();
+      state.activeNoteId = note.id;
+
+      document.getElementById('noteGroupPageTitle').textContent = group.name || 'Notes';
+      
+      const titleInput = document.getElementById('noteTitleInput');
+      if (titleInput) titleInput.value = note.title || `Page ${group.notes.findIndex(n => n.id === note.id) + 1}`;
+      
+      const editor = document.getElementById('noteContentEditor');
+      if (editor && document.activeElement !== editor) {
+         editor.innerHTML = note.content || '';
+         // Re-attach listeners to existing math fields inside content
+         editor.querySelectorAll('math-field').forEach(mf => {
+             mf.addEventListener('focus', () => {
+                 window.lastFocusedMathField = mf;
+                 document.getElementById('mathToolbar').style.display = 'flex';
+             });
+             mf.addEventListener('keydown', (evt) => {
+                 if (evt.key === 'Backspace' && mf.value === '') {
+                     evt.preventDefault();
+                     const parentSpan = mf.closest('.math-wrapper');
+                     if (parentSpan) parentSpan.remove();
+                     editor.focus();
+                     document.getElementById('mathToolbar').style.display = 'none';
+                     saveNote(true);
+                 }
+             });
+             mf.addEventListener('input', () => saveNote(true));
+         });
+      }
+
+      const pageSelect = document.getElementById('pageSelect');
+      if (pageSelect){
+        pageSelect.innerHTML = group.notes.map((n, i) => `
+          <option value="${n.id}" ${n.id === state.activeNoteId ? 'selected' : ''}>${escapeHtml((n.title && n.title !== `Page ${i+1}`) ? n.title : `Page ${i+1}`)}</option>
+        `).join('');
+      }
+
+      activeStickers = Array.isArray(note.stickers) ? [...note.stickers] : [];
+      renderNoteStickers();
+
+      const assignedChar = getNoteGroupCharacter(group);
+      renderNoteCharacterOptions('noteGroupCharacterSelect', assignedChar ? assignedChar.id : '');
+      renderNoteCompanion(group);
+    }
+
+    function renderThemes(){
+      if (!state.activeThemeId && state.themes[0]) state.activeThemeId = state.themes[0].id;
+      const list = document.getElementById('themesList');
+      const theme = currentTheme();
+ 
+      list.innerHTML = state.themes.map(t => `
+        <div class="miniCard ${t.id === state.activeThemeId ? 'active' : ''}">
+          <div class="cardHead">
+            <strong>${escapeHtml(t.name)}</strong>
+            <div class="toolbar" style="margin:0;">
+              <button class="iconBtn" onclick="editTheme('${t.id}')">Edit</button>
+              <button class="iconBtn" onclick="applyTheme('${t.id}')">Use</button>
+              <button class="iconBtn" onclick="deleteTheme('${t.id}')">Remove</button>
+            </div>
+          </div>
+        </div>
+      `).join('') || `<div class="muted">No themes yet. Add one on the right.</div>`;
+ 
+      fillThemeForm(theme);
+      document.getElementById('themePreviewName').textContent = theme ? theme.name : 'Preview';
+      document.getElementById('themePreviewBox').style.background = (theme && theme.backgroundImage)
+        ? `linear-gradient(180deg, rgba(0,0,0,.03), rgba(0,0,0,.03)), url(${theme.backgroundImage}) center/cover`
+        : 'rgba(255,255,255,.5)';
+    }
+ 
+    function fillThemeForm(t){
+      const th = t || { name:'', characterIds:[] };
+      document.getElementById('themeEditorTitle').textContent = t ? 'Editing: ' + t.name : 'Theme editor';
+      document.getElementById('themeNameInput').value = th.name || '';
+      renderThemeCharacterChecks(new Set(th.characterIds || []));
+    }
+ 
+    function renderSettings(){
+      document.getElementById('usernameInput').value = state.profile.username || '';
+      document.getElementById('accentHexInput').value = state.settings.accent || '#8b7cf6';
+      document.getElementById('modeInput').value = state.settings.mode || 'system';
+ 
+      const row = document.getElementById('paletteRow');
+      row.innerHTML = PALETTE.map(c => `<button class="colorSwatch" title="${c}" style="background:${c}" onclick="setAccent('${c}')"></button>`).join('');
+    }
+ 
+    function openWeek(id){
+      const week = state.weeks.find(w => w.id === id);
+      if (!week) return;
+      state.activeWeekId = id;
+      updateWeekSpeech(week, 'open');
+      navigateTo('week', `#week-${id}`);
+      save(true);
+    }
+ 
+    function addWeek(){
+      const name = prompt('Week name?', `Week ${state.weeks.length + 1}`);
+      if (!name) return;
+      const week = { id:uid(), name, characterId:'', themeCharacters:{}, tasks:[], priorities:[], xp:0, lastSpeech:null, weekBonusAwarded:false };
+      state.weeks.push(week);
+      state.activeWeekId = week.id;
+      navigateTo('week', `#week-${week.id}`);
+      save(true);
+    }
+ 
+    function renameWeek(id){
+      const w = state.weeks.find(x => x.id === id);
+      if (!w) return;
+      const name = prompt('Rename week', w.name);
+      if (!name) return;
+      w.name = name;
+      save(true);
+    }
+ 
+    function deleteWeek(id){
+      if (!confirm('Remove this week?')) return;
+      state.weeks = state.weeks.filter(w => w.id !== id);
+      if (state.activeWeekId === id) state.activeWeekId = (state.weeks[0] ? state.weeks[0].id : '');
+      if (state.activeTab === 'week'){
+        navigateTo(state.activeWeekId ? 'week' : 'schedule', state.activeWeekId ? `#week-${state.activeWeekId}` : '#todo');
+      }
+      save(true);
+    }
+ 
+    function saveWeek(){
+      const week = currentWeek();
+      if (!week) return;
+ 
+      const nameId = state.activeTab === 'week' ? 'weekPageNameInput' : 'weekNameInput';
+      const charId = state.activeTab === 'week' ? 'weekPageCharacterSelect' : 'weekCharacterSelect';
+      const nameEl = document.getElementById(nameId);
+      const charEl = document.getElementById(charId);
+ 
+      if (nameEl) week.name = nameEl.value.trim() || week.name;
+      if (charEl) {
+        const theme = currentTheme();
+        if (theme) {
+          if (!week.themeCharacters) week.themeCharacters = {};
+          week.themeCharacters[theme.id] = charEl.value || '';
+        } else {
+          week.characterId = charEl.value || '';
+        }
+      }
+      save(true);
+    }
+ 
+    function addWeekTask(){
+      const week = currentWeek();
+      if (!week) return;
+      const pageInput = document.getElementById('newWeekTaskInputPage');
+      const dateInput = document.getElementById('newWeekTaskDatePage');
+      if (!pageInput) return;
+      const text = pageInput.value.trim();
+      if (!text) return;
+      const date = dateInput ? dateInput.value : '';
+ 
+      week.tasks.push({ id:uid(), text, done:false, xpAwarded:false, date });
+      pageInput.value = '';
+      if(dateInput) dateInput.value = '';
+
+      updateWeekSpeech(week, 'add');
+      renderWeekTasks(week, 'weekPageTasksList');
+      renderWeekProgress(week, 'weekPageProgressFill', 'weekPageProgressText');
+      if (state.activeTab === 'week') burstConfetti(window.innerWidth - 120, window.innerHeight - 120, 36, 9);
+      checkWeekCompletion(week);
+      save(true);
+
+      if (state.activeTab === 'week') {
+         const calGrid = document.getElementById('weekPageActualCalendarGrid');
+         if (calGrid && document.getElementById('weekFloatingCalendar').style.display !== 'none') {
+             calGrid.innerHTML = generateActualCalendarHTML(true);
+         }
+      }
+    }
+ 
+    function toggleWeekTask(weekId, index){
+      const week = state.weeks.find(w => w.id === weekId);
+      if (!week || !week.tasks[index]) return;
+      const task = week.tasks[index];
+      const wasDone = !!task.done;
+      task.done = !task.done;
+ 
+      if (!wasDone && task.done){
+        const gotXP = awardItemXp(week, task);
+        if (gotXP){
+          burstConfetti(window.innerWidth - 120, window.innerHeight - 120, 42, 10);
+          toast('+10 XP');
+        }
+        updateWeekSpeech(week, 'done');
+      }
+ 
+      renderWeekTasks(week, 'weekPageTasksList');
+      renderWeekProgress(week, 'weekPageProgressFill', 'weekPageProgressText');
+      checkWeekCompletion(week);
+      save(true);
+
+      if (state.activeTab === 'week') {
+         const calGrid = document.getElementById('weekPageActualCalendarGrid');
+         if (calGrid && document.getElementById('weekFloatingCalendar').style.display !== 'none') {
+             calGrid.innerHTML = generateActualCalendarHTML(true);
+         }
+      }
+    }
+ 
+function removeWeekTask(weekId, index){
+  const week = state.weeks.find(w => w.id === weekId);
+  if (!week || !week.tasks[index]) return;
+
+  stopCurrentVoice();
+  stopSpeechMotion();
+  week.lastSpeech = null;
+
+  week.tasks.splice(index, 1);
+  renderWeekTasks(week, 'weekPageTasksList');
+  renderWeekProgress(week, 'weekPageProgressFill', 'weekPageProgressText');
+  renderWeekPage();
+  save(true);
+}
+ 
+function addWeekPriority(){
+  const week = currentWeek();
+  if (!week) return;
+  const input = document.getElementById('newWeekPriorityInputPage');
+  const dateInput = document.getElementById('newWeekPriorityDatePage');
+  if (!input) return;
+  const text = input.value.trim();
+  if (!text) return;
+  const date = dateInput ? dateInput.value : '';
+ 
+  if (!Array.isArray(week.priorities)) week.priorities = [];
+  week.priorities.push({ id: uid(), text, done:false, xpAwarded:false, date });
+  input.value = '';
+  if(dateInput) dateInput.value = '';
+
+  updateWeekSpeech(week, 'add');
+  renderWeekTasks(week, 'weekPageTasksList');
+  renderWeekProgress(week, 'weekPageProgressFill', 'weekPageProgressText');
+  checkWeekCompletion(week);
+  save(true);
+
+  if (state.activeTab === 'week') {
+     const calGrid = document.getElementById('weekPageActualCalendarGrid');
+     if (calGrid && document.getElementById('weekFloatingCalendar').style.display !== 'none') {
+         calGrid.innerHTML = generateActualCalendarHTML(true);
+     }
+  }
+}
+ 
+function toggleWeekPriority(weekId, index){
+  const week = state.weeks.find(w => w.id === weekId);
+  if (!week || !Array.isArray(week.priorities) || index < 0 || index >= week.priorities.length) return;
+  const item = typeof week.priorities[index] === 'string'
+    ? { text: week.priorities[index], done:false, xpAwarded:false, date:'' }
+    : week.priorities[index];
+  const wasDone = !!item.done;
+  item.done = !item.done;
+  week.priorities[index] = item;
+ 
+  if (!wasDone && item.done){
+    const gotXP = awardItemXp(week, item);
+    if (gotXP){
+      burstConfetti(window.innerWidth - 120, window.innerHeight - 120, 42, 10);
+          toast('+10 XP');
+    }
+    updateWeekSpeech(week, 'done');
+  }
+ 
+  renderWeekTasks(week, 'weekPageTasksList');
+  renderWeekProgress(week, 'weekPageProgressFill', 'weekPageProgressText');
+  checkWeekCompletion(week);
+  save(true);
+
+  if (state.activeTab === 'week') {
+     const calGrid = document.getElementById('weekPageActualCalendarGrid');
+     if (calGrid && document.getElementById('weekFloatingCalendar').style.display !== 'none') {
+         calGrid.innerHTML = generateActualCalendarHTML(true);
+     }
+  }
+}
+ 
+function removeWeekPriority(weekId, index){
+  const week = state.weeks.find(w => w.id === weekId);
+  if (!week || !Array.isArray(week.priorities) || index < 0 || index >= week.priorities.length) return;
+
+  stopCurrentVoice();
+  stopSpeechMotion();
+  week.lastSpeech = null;
+
+  week.priorities.splice(index, 1);
+  renderWeekPage();
+  save(true);
+}
+ 
+async function saveCharacter(){
+  let ch = state.characters.find(c => c.id === state.activeCharacterId);
+  const isNew = !ch;
+  if (!ch){
+    ch = { id:uid(), name:'', sprite:'', mode:'bubble', bounce:true, bubbleOpen:[], bubbleAdd:[], bubbleDone:[], bubbleWeek:[], voiceOpen:[], voiceAdd:[], voiceDone:[], voiceWeek:[] };
+    state.characters.push(ch);
+    state.activeCharacterId = ch.id;
+  }
+ 
+  ch.name = document.getElementById('characterNameInput').value.trim() || 'Character';
+  ch.mode = document.getElementById('characterModeInput').value;
+  ch.bounce = document.getElementById('characterBounceInput').value !== 'off';
+ 
+  ch.bubbleOpen = [
+    (document.getElementById('charBubbleOpen1') ? document.getElementById('charBubbleOpen1').value : ''),
+    (document.getElementById('charBubbleOpen2') ? document.getElementById('charBubbleOpen2').value : ''),
+    (document.getElementById('charBubbleOpen3') ? document.getElementById('charBubbleOpen3').value : '')
+  ].filter(v => v && v.trim());
+ 
+  ch.bubbleAdd = [
+    (document.getElementById('charBubbleAdd1') ? document.getElementById('charBubbleAdd1').value : ''),
+    (document.getElementById('charBubbleAdd2') ? document.getElementById('charBubbleAdd2').value : ''),
+    (document.getElementById('charBubbleAdd3') ? document.getElementById('charBubbleAdd3').value : '')
+  ].filter(v => v && v.trim());
+ 
+  ch.bubbleDone = [
+    (document.getElementById('charBubbleDone1') ? document.getElementById('charBubbleDone1').value : ''),
+    (document.getElementById('charBubbleDone2') ? document.getElementById('charBubbleDone2').value : ''),
+    (document.getElementById('charBubbleDone3') ? document.getElementById('charBubbleDone3').value : '')
+  ].filter(v => v && v.trim());
+ 
+  ch.bubbleWeek = [
+    (document.getElementById('charBubbleWeek1') ? document.getElementById('charBubbleWeek1').value : ''),
+    (document.getElementById('charBubbleWeek2') ? document.getElementById('charBubbleWeek2').value : ''),
+    (document.getElementById('charBubbleWeek3') ? document.getElementById('charBubbleWeek3').value : '')
+  ].filter(v => v && v.trim());
+ 
+  const spriteFile = document.getElementById('characterSpriteInput').files[0];
+  if (spriteFile) ch.sprite = await readFileAsDataURL(spriteFile);
+ 
+  const readVoiceFiles = async (id) => {
+    const input = document.getElementById(id);
+    if (!input || !input.files || input.files.length === 0) return null;
+    const files = Array.from(input.files).slice(0, 3);
+    const out = [];
+    for (const f of files){
+      out.push(await readFileAsDataURL(f));
+    }
+    return out;
+  };
+ 
+  const vo = await readVoiceFiles('charVoiceOpen');
+  if (vo) ch.voiceOpen = vo;
+  
+  const va = await readVoiceFiles('charVoiceAdd');
+  if (va) ch.voiceAdd = va;
+
+  const vd = await readVoiceFiles('charVoiceDone');
+  if (vd) ch.voiceDone = vd;
+
+  const vw = await readVoiceFiles('charVoiceWeek');
+  if (vw) ch.voiceWeek = vw;
+ 
+  const theme = currentTheme();
+  if (isNew && theme) {
+    if (!theme.characterIds) theme.characterIds = [];
+    if (!theme.characterIds.includes(ch.id)) {
+      theme.characterIds.push(ch.id);
+    }
+  }
+
+  save(true);
+  if (isNew) toast('Character added');
+  renderAll(); // Ensure UI refreshes cleanly
+}
+ 
+    function editCharacter(id){
+      state.activeCharacterId = id;
+      renderAll();
+    }
+ 
+    function deleteCharacter(id){
+      if (!confirm('Remove this character?')) return;
+      state.characters = state.characters.filter(c => c.id !== id);
+      state.weeks.forEach(w => { if (w.characterId === id) w.characterId = ''; });
+      if (state.activeCharacterId === id) state.activeCharacterId = '';
+      save(true);
+    }
+ 
+    async function saveTheme(){
+      let theme = state.themes.find(t => t.id === state.activeThemeId);
+      const isNew = !theme;
+      if (!theme){
+        theme = { id:uid(), name:'', backgroundImage:'', icon:'', accent:state.settings.accent, characterIds:[] };
+        state.themes.push(theme);
+        state.activeThemeId = theme.id;
+      }
+ 
+      theme.name = document.getElementById('themeNameInput').value.trim() || 'Theme';
+      theme.characterIds = Array.from(document.querySelectorAll('#themeCharacterChecks input[type="checkbox"]:checked')).map(x => x.value);
+ 
+      const bg = document.getElementById('themeBgInput').files[0];
+      const icon = document.getElementById('themeIconInput').files[0];
+      if (bg) theme.backgroundImage = await readFileAsDataURL(bg);
+      if (icon) theme.icon = await readFileAsDataURL(icon);
+ 
+      save();
+      if (isNew) toast('Theme added');
+    }
+ 
+    function editTheme(id){
+      state.activeThemeId = id;
+      renderAll();
+    }
+ 
+    function applyTheme(id){
+      state.activeThemeId = id;
+      const theme = currentTheme();
+      if (theme && theme.accent) state.settings.accent = theme.accent;
+      save();
+    }
+ 
+    function deleteTheme(id){
+      if (!confirm('Remove this theme?')) return;
+      state.themes = state.themes.filter(t => t.id !== id);
+      if (state.activeThemeId === id) state.activeThemeId = (state.themes[0] ? state.themes[0].id : '');
+      save(true);
+    }
+ 
+    function saveProfile(){
+      state.profile.username = document.getElementById('usernameInput').value.trim() || 'Your Name';
+      save();
+    }
+ 
+    function saveAppearance(){
+      const hex = document.getElementById('accentHexInput').value.trim();
+      if (hex) {
+        state.settings.accent = hex;
+        const theme = currentTheme();
+        if (theme) theme.accent = hex;
+      }
+      state.settings.mode = document.getElementById('modeInput').value;
+      save();
+    }
+ 
+    function setAccent(c){
+      state.settings.accent = c;
+      document.getElementById('accentHexInput').value = c;
+      const theme = currentTheme();
+      if (theme) theme.accent = c;
+      applyAppearance();
+      save(true);
+    }
+ 
+    async function saveSettings(){
+      const file = document.getElementById('pfpInput').files[0];
+      if (file) state.profile.pfp = await readFileAsDataURL(file);
+      saveProfile();
+      saveAppearance();
+    }
+ 
+    function renderWeekCharacterOptions(selectId, selectedId){
+      const sel = document.getElementById(selectId);
+      if (!sel) return;
+      const theme = currentTheme();
+      const filtered = (theme && state.themes.length > 0) ? state.characters.filter(c => theme.characterIds && theme.characterIds.includes(c.id)) : state.characters;
+      
+      sel.innerHTML = `<option value="">No character</option>` + filtered.map(c => `
+        <option value="${c.id}" ${c.id === selectedId ? 'selected' : ''}>${escapeHtml(c.name)}</option>
+      `).join('');
+    }
+
+    function renderNoteCharacterOptions(selectId, selectedId){
+      const sel = document.getElementById(selectId);
+      if (!sel) return;
+      const theme = currentTheme();
+      const filtered = (theme && state.themes.length > 0) ? state.characters.filter(c => theme.characterIds && theme.characterIds.includes(c.id)) : state.characters;
+      
+      sel.innerHTML = `<option value="">No character</option>` + filtered.map(c => `
+        <option value="${c.id}" ${c.id === selectedId ? 'selected' : ''}>${escapeHtml(c.name)}</option>
+      `).join('');
+    }
+ 
+    function renderWeekTasks(week, listId){
+      const list = document.getElementById(listId);
+      if (!list) return;
+      if (!week){
+        list.innerHTML = '';
+        return;
+      }
+ 
+      list.innerHTML = week.tasks.map((t, i) => {
+        const dateBadge = t.date ? `<div class="small" style="color:var(--accent); margin-top:2px; font-weight:600;">📅 Due: ${t.date}</div>` : '';
+        return `
+        <div class="taskItem" style="align-items:flex-start;">
+          <label style="align-items:flex-start; padding-top:2px;">
+            <input type="checkbox" ${t.done ? 'checked' : ''} onchange="toggleWeekTask('${week.id}', ${i})">
+            <div style="${t.done ? 'text-decoration:line-through; opacity:0.6;' : ''}">
+                ${escapeHtml(t.text)}
+                ${dateBadge}
+            </div>
+          </label>
+          <button class="iconBtn" onclick="removeWeekTask('${week.id}', ${i})">✕</button>
+        </div>
+      `}).join('') || `<div class="muted">No tasks yet. Add your first one.</div>`;
+    }
+ 
+    function renderWeekProgress(week, fillId, textId){
+      const percent = weekPercent(week);
+      const fill = document.getElementById(fillId);
+      const text = document.getElementById(textId);
+      if (fill) fill.style.width = percent + '%';
+      if (text) text.textContent = percent + '%';
+    }
+ 
+    function renderThemeCharacterChecks(selected){
+      const box = document.getElementById('themeCharacterChecks');
+      box.innerHTML = state.characters.map(c => `
+        <label class="taskItem">
+          <span style="display:flex;align-items:center;gap:10px;">
+            <input type="checkbox" value="${c.id}" ${selected.has(c.id) ? 'checked' : ''}>
+            ${escapeHtml(c.name)}
+          </span>
+        </label>
+      `).join('') || `<div class="muted">Add characters first to assign them to a theme.</div>`;
+    }
+ 
+    function exportData(){
+      const blob = new Blob([JSON.stringify(state, null, 2)], { type:'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'school-companion-backup.json';
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }
+ 
+    function importData(file){
+      const fr = new FileReader();
+      fr.onload = () => {
+        try{
+          const next = JSON.parse(fr.result);
+          state = buildState(next);
+          save(true);
+          renderAll();
+          toast('Imported');
+        }catch(err){
+          alert('Import failed. That file did not look like a valid backup.');
+        }
+      };
+      fr.readAsText(file);
+    }
+ 
+    function wireLivePreviews(){
+      ['characterNameInput','characterModeInput','characterBounceInput'].forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.oninput = renderCharacterPreview;
+        el.onchange = renderCharacterPreview;
+      });
+ 
+      Array.from(document.querySelectorAll('[id^="charBubble"]')).forEach(el => {
+        el.oninput = renderCharacterPreview;
+        el.onchange = renderCharacterPreview;
+      });
+ 
+      const spriteInput = document.getElementById('characterSpriteInput');
+      if (spriteInput){
+        spriteInput.onchange = async () => {
+          const file = spriteInput.files[0];
+          if (!file) return;
+          const img = document.getElementById('characterPreviewImg');
+          if (img) img.src = await readFileAsDataURL(file);
+        };
+      }
+    }
+
+    async function importStickers(){
+      const input = document.getElementById('stickerInput');
+      if (!input || !input.files || !input.files.length) return;
+
+      const files = Array.from(input.files);
+      for (const file of files){
+        if (!file.type.startsWith('image/')) continue;
+        const src = await readFileAsDataURL(file);
+        state.stickers.push({
+          id: uid(),
+          name: file.name.replace(/\.[^.]+$/, '') || 'Sticker',
+          src
+        });
+      }
+      input.value = '';
+      save(true);
+      renderStickers();
+      toast('Stickers imported');
+    }
+
+    let activeStickers = [];
+    let stickerHistory = [];
+    let lastActionType = 'text';
+
+    function pushStickerHistory() {
+        lastActionType = 'sticker';
+        stickerHistory.push(JSON.stringify(activeStickers));
+        if (stickerHistory.length > 20) stickerHistory.shift();
+    }
+
+    let currentDragSticker = null;
+    let currentDragAction = null;
+    let dragStartX = 0, dragStartY = 0;
+    let stickerStartData = {};
+
+    function attachStickerEvents(el, sticker) {
+        el.addEventListener('mousedown', (e) => {
+            if(e.target.classList.contains('delete-handle')) return; 
+            if(e.button === 2) { 
+                showStickerContextMenu(e, sticker); 
+                return; 
+            }
+            
+            // Mark as globally selected sticker
+            window.selectedStickerId = sticker.id;
+            document.querySelectorAll('.custom-sticker').forEach(elem => elem.classList.remove('selected-sticker'));
+            el.classList.add('selected-sticker');
+
+            pushStickerHistory();
+
+            activeStickers = activeStickers.filter(s => s.id !== sticker.id);
+            activeStickers.push(sticker);
+            renderNoteStickers();
+
+            const sEl = document.getElementById('sticker-'+sticker.id);
+            if(!sEl) return;
+
+            const rect = sEl.getBoundingClientRect();
+            stickerStartData = {
+                x: sticker.x, y: sticker.y, 
+                w: sticker.w, h: sticker.h, 
+                rot: sticker.rot || 0,
+                cx: rect.left + rect.width/2,
+                cy: rect.top + rect.height/2
+            };
+
+            dragStartX = e.clientX;
+            dragStartY = e.clientY;
+            currentDragSticker = sticker;
+
+            sEl.classList.add('is-dragging');
+            document.body.style.userSelect = 'none';
+
+            if (e.target.classList.contains('resize-handle')) {
+                currentDragAction = 'resize';
+            } else if (e.target.classList.contains('rotate-handle')) {
+                currentDragAction = 'rotate';
+                stickerStartData.startAngle = Math.atan2(e.clientY - stickerStartData.cy, e.clientX - stickerStartData.cx) * 180 / Math.PI;
+            } else {
+                currentDragAction = 'move';
+            }
+            e.stopPropagation();
+            e.preventDefault();
+        });
+
+        // SAFARI/IOS TOUCH LISTENER
+        el.addEventListener('touchstart', (e) => {
+            if(e.target.classList.contains('delete-handle')) return; 
+            if (e.touches.length > 1) return;
+            
+            e.preventDefault(); // FIX: Stops native scroll and long-press right click on mobile!
+            const touch = e.touches[0];
+            
+            // Mark as globally selected sticker
+            window.selectedStickerId = sticker.id;
+            document.querySelectorAll('.custom-sticker').forEach(elem => elem.classList.remove('selected-sticker'));
+            el.classList.add('selected-sticker');
+
+            clearTimeout(stickerLongPressTimer);
+            stickerLongPressTimer = setTimeout(() => {
+                if (currentDragAction) return; // FIX: Don't show menu if already dragging
+                showStickerContextMenu(touch, sticker);
+                currentDragSticker = null;
+                el.classList.remove('is-dragging');
+                document.body.style.userSelect = '';
+            }, 800); // FIX: Extended so it doesn't accidentally trigger while preparing to drag
+
+            pushStickerHistory();
+
+            activeStickers = activeStickers.filter(s => s.id !== sticker.id);
+            activeStickers.push(sticker);
+            renderNoteStickers();
+
+            const sEl = document.getElementById('sticker-'+sticker.id);
+            if(!sEl) return;
+
+            const rect = sEl.getBoundingClientRect();
+            stickerStartData = {
+                x: sticker.x, y: sticker.y, 
+                w: sticker.w, h: sticker.h, 
+                rot: sticker.rot || 0,
+                cx: rect.left + rect.width/2,
+                cy: rect.top + rect.height/2
+            };
+
+            dragStartX = touch.clientX;
+            dragStartY = touch.clientY;
+            currentDragSticker = sticker;
+
+            sEl.classList.add('is-dragging');
+            document.body.style.userSelect = 'none';
+
+            if (e.target.classList.contains('resize-handle')) {
+                currentDragAction = 'resize';
+            } else if (e.target.classList.contains('rotate-handle')) {
+                currentDragAction = 'rotate';
+                stickerStartData.startAngle = Math.atan2(touch.clientY - stickerStartData.cy, touch.clientX - stickerStartData.cx) * 180 / Math.PI;
+            } else {
+                currentDragAction = 'move';
+            }
+            e.stopPropagation();
+        }, { passive: false });
+        
+        el.addEventListener('contextmenu', (e) => {
+            e.preventDefault(); // FIX: disables standard browser right click
+            showStickerContextMenu(e, sticker);
+        });
+    }
+
+    document.addEventListener('mousemove', e => {
+        if (!currentDragSticker) return;
+        const dx = e.clientX - dragStartX;
+        const dy = e.clientY - dragStartY;
+        const s = currentDragSticker;
+
+        if (currentDragAction === 'move') {
+            s.x = stickerStartData.x + dx;
+            s.y = stickerStartData.y + dy;
+        } else if (currentDragAction === 'resize') {
+            const ratio = stickerStartData.w / stickerStartData.h;
+            let newW = stickerStartData.w + dx;
+            if (newW < 20) newW = 20;
+            s.w = newW;
+            s.h = newW / ratio;
+        } else if (currentDragAction === 'rotate') {
+            const angle = Math.atan2(e.clientY - stickerStartData.cy, e.clientX - stickerStartData.cx) * 180 / Math.PI;
+            s.rot = stickerStartData.rot + (angle - stickerStartData.startAngle);
+        }
+        renderNoteStickers();
+    });
+
+    document.addEventListener('touchmove', e => {
+        if (!currentDragSticker) return;
+        if (e.cancelable) e.preventDefault();
+        
+        if (e.touches.length > 1) return;
+        const touch = e.touches[0];
+        
+        const dx = touch.clientX - dragStartX;
+        const dy = touch.clientY - dragStartY;
+        
+        if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
+            clearTimeout(stickerLongPressTimer);
+        }
+
+        const s = currentDragSticker;
+
+        if (currentDragAction === 'move') {
+            s.x = stickerStartData.x + dx;
+            s.y = stickerStartData.y + dy;
+        } else if (currentDragAction === 'resize') {
+            const ratio = stickerStartData.w / stickerStartData.h;
+            let newW = stickerStartData.w + dx;
+            if (newW < 20) newW = 20;
+            s.w = newW;
+            s.h = newW / ratio;
+        } else if (currentDragAction === 'rotate') {
+            const angle = Math.atan2(touch.clientY - stickerStartData.cy, touch.clientX - stickerStartData.cx) * 180 / Math.PI;
+            s.rot = stickerStartData.rot + (angle - stickerStartData.startAngle);
+        }
+        renderNoteStickers();
+    }, { passive: false });
+
+    document.addEventListener('mouseup', () => {
+        if (currentDragSticker) {
+            const sEl = document.getElementById('sticker-'+currentDragSticker.id);
+            if(sEl) sEl.classList.remove('is-dragging');
+            document.body.style.userSelect = '';
+            
+            currentDragSticker = null;
+            currentDragAction = null;
+            saveNote(true);
+        }
+    });
+
+    document.addEventListener('touchend', () => {
+        clearTimeout(stickerLongPressTimer);
+        if (currentDragSticker) {
+            const sEl = document.getElementById('sticker-'+currentDragSticker.id);
+            if(sEl) sEl.classList.remove('is-dragging');
+            document.body.style.userSelect = '';
+            
+            currentDragSticker = null;
+            currentDragAction = null;
+            saveNote(true);
+        }
+    });
+
+    // Global deselect click handlers
+    document.addEventListener('mousedown', e => {
+        if (!e.target.closest('.custom-sticker') && !e.target.closest('#floatingStickerBook') && !e.target.closest('#stickerContextMenu') && !e.target.closest('.docsToolbar') && !e.target.closest('.docsMenuBar')) {
+            document.querySelectorAll('.custom-sticker').forEach(el => el.classList.remove('selected-sticker'));
+            window.selectedStickerId = null;
+        }
+    });
+
+    document.addEventListener('touchstart', e => {
+        if (!e.target.closest('.custom-sticker') && !e.target.closest('#floatingStickerBook') && !e.target.closest('#stickerContextMenu') && !e.target.closest('.docsToolbar') && !e.target.closest('.docsMenuBar')) {
+            document.querySelectorAll('.custom-sticker').forEach(el => el.classList.remove('selected-sticker'));
+            window.selectedStickerId = null;
+        }
+    });
+
+    let activeStickerForMenu = null;
+    function showStickerContextMenu(e, sticker) {
+        if(e.preventDefault) e.preventDefault();
+        if(e.stopPropagation) e.stopPropagation();
+        activeStickerForMenu = sticker;
+        const menu = document.getElementById('stickerContextMenu');
+        if(menu) {
+           menu.style.display = 'grid';
+           const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+           const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+           menu.style.left = clientX + 'px';
+           menu.style.top = clientY + 'px';
+        }
+    }
+
+    // Direct deletion handler used by mobile-friendly explicit X button
+    window.stkActionDirect = function(action, id, e) {
+        e.stopPropagation();
+        e.preventDefault();
+        pushStickerHistory();
+        if (action === 'delete') {
+            activeStickers = activeStickers.filter(x => x.id !== id);
+        }
+        renderNoteStickers();
+        saveNote(true);
+    };
+
+    window.stkAction = function(action) {
+        if (!activeStickerForMenu) return;
+        pushStickerHistory();
+        const s = activeStickerForMenu;
+        if (action === 'delete') {
+            activeStickers = activeStickers.filter(x => x.id !== s.id);
+        } else if (action === 'behind') {
+            s.behindText = !s.behindText;
+        } else if (action === 'front') {
+            activeStickers = activeStickers.filter(x => x.id !== s.id);
+            activeStickers.push(s); 
+        } else if (action === 'back') {
+            activeStickers = activeStickers.filter(x => x.id !== s.id);
+            activeStickers.unshift(s); 
+        }
+        const menu = document.getElementById('stickerContextMenu');
+        if(menu) menu.style.display = 'none';
+        activeStickerForMenu = null;
+        renderNoteStickers();
+        saveNote(true);
+    };
+    
+    document.addEventListener('mousedown', e => {
+        const menu = document.getElementById('stickerContextMenu');
+        if (menu && menu.style.display !== 'none' && !menu.contains(e.target)) {
+            menu.style.display = 'none';
+        }
+    });
+
+    document.addEventListener('touchstart', e => {
+        const menu = document.getElementById('stickerContextMenu');
+        if (menu && menu.style.display !== 'none' && !menu.contains(e.target)) {
+            menu.style.display = 'none';
+        }
+    });
+
+    function renderNoteStickers() {
+        const container = document.getElementById('noteStickersContainer');
+        if(!container) return;
+        container.innerHTML = '';
+        
+        activeStickers.forEach(sticker => {
+            const el = document.createElement('div');
+            el.id = 'sticker-' + sticker.id;
+            el.className = 'custom-sticker';
+            el.style.left = sticker.x + 'px';
+            el.style.top = sticker.y + 'px';
+            el.style.width = sticker.w + 'px';
+            el.style.height = sticker.h + 'px';
+            el.style.transform = `rotate(${sticker.rot || 0}deg)`;
+            el.style.zIndex = sticker.behindText ? 5 : 15;
+            
+            if (window.selectedStickerId === sticker.id) {
+                el.classList.add('selected-sticker');
+            }
+
+            // FIX: Using ontouchend to bypass stopPropagation issues on touchstart
+            el.innerHTML = `
+               <img src="${sticker.src}" draggable="false">
+               <div class="delete-handle" ontouchend="stkActionDirect('delete', '${sticker.id}', event)" onclick="stkActionDirect('delete', '${sticker.id}', event)">✕</div>
+               <div class="sticker-handle resize-handle"></div>
+               <div class="sticker-handle rotate-handle"></div>
+            `;
+
+            attachStickerEvents(el, sticker);
+            container.appendChild(el);
+        });
+    }
+
+    function insertStickerIntoNote(src) {
+        const img = new Image();
+        img.onload = () => {
+            pushStickerHistory();
+            const ratio = img.height / img.width;
+            activeStickers.push({
+               id: uid(), src,
+               x: 100, y: 100,
+               w: 120, h: 120 * ratio,
+               rot: 0, behindText: false
+            });
+            renderNoteStickers();
+            saveNote(true);
+        };
+        img.src = src;
+    }
+
+    function deleteSticker(id){
+      if (!confirm('Remove this sticker?')) return;
+      state.stickers = (state.stickers || []).filter(s => s.id !== id);
+      save(true);
+      renderStickers();
+    }
+
+    function renderStickers(){
+      const list = document.getElementById('stickersList');
+      const floatList = document.getElementById('floatingStickersList');
+
+      if (!Array.isArray(state.stickers)) state.stickers = [];
+      
+      const html = state.stickers.map(sticker => `
+        <div class="miniCard stickerCard">
+          <img class="stickerThumb" src="${sticker.src}" alt="${escapeHtml(sticker.name)}">
+          <div class="cardHead">
+            <strong>${escapeHtml(sticker.name)}</strong>
+          </div>
+          <div class="toolbar" style="margin:0;">
+            <button class="iconBtn" onclick="deleteSticker('${sticker.id}')" style="color:var(--danger)">Remove</button>
+          </div>
+        </div>
+      `).join('') || `<div class="muted" style="grid-column: 1/-1;">No stickers yet. Import a few.</div>`;
+
+      if (list) list.innerHTML = html;
+
+      if (floatList) {
+        floatList.innerHTML = state.stickers.map(sticker => `
+          <img class="stickerThumb" src="${sticker.src}" title="${escapeHtml(sticker.name)}" onclick="insertStickerIntoNote('${sticker.src.replace(/'/g, "\\'")}')">
+        `).join('') || `<div class="small muted" style="grid-column: 1/-1;">No stickers. Add some in the Stickers tab.</div>`;
+      }
+    }
+
+    // MONTH NAVIGATION
+    window.changeMonth = function(offset) {
+        viewingMonth += offset;
+        if (viewingMonth < 0) {
+            viewingMonth = 11;
+            viewingYear--;
+        } else if (viewingMonth > 11) {
+            viewingMonth = 0;
+            viewingYear++;
+        }
+        renderAll();
+    };
+
+    // ACTUAL CALENDAR GENERATOR
+    function generateActualCalendarHTML(isMini = false) {
+      const now = new Date();
+      const year = viewingYear;
+      const month = viewingMonth;
+      const today = now.getDate();
+      const isCurrentMonth = (year === now.getFullYear() && month === now.getMonth());
+
+      const firstDay = new Date(year, month, 1).getDay();
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      
+      const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+      
+      const tasksByDate = {};
+      if(state.weeks) {
+          state.weeks.forEach(w => {
+              if (w.tasks) {
+                  w.tasks.forEach(t => {
+                      if(t.date) {
+                          if(!tasksByDate[t.date]) tasksByDate[t.date] = [];
+                          tasksByDate[t.date].push({ ...t, type: 'task', weekName: w.name });
+                      }
+                  });
+              }
+              if (w.priorities) {
+                  w.priorities.forEach(p => {
+                      const pItem = typeof p === 'string' ? {text: p} : p;
+                      if(pItem.date) {
+                          if(!tasksByDate[pItem.date]) tasksByDate[pItem.date] = [];
+                          tasksByDate[pItem.date].push({ ...pItem, type: 'priority', weekName: w.name });
+                      }
+                  });
+              }
+          });
+      }
+
+      const minWidthStr = isMini ? '100%' : '600px';
+      const cellMinHeight = isMini ? '60px' : '80px';
+      const gapStr = isMini ? '4px' : '6px';
+      const titleSize = isMini ? '10px' : '11px';
+
+      let html = `
+      <div style="${isMini ? '' : 'background:var(--panel-strong); border:1px solid var(--border); border-radius:18px; padding:16px;'}">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+              <button class="iconBtn" onclick="changeMonth(-1)" style="background:var(--panel); border:1px solid var(--border); border-radius:8px;">◀</button>
+              <div style="font-size:18px; font-weight:bold; color:var(--accent);">
+                  ${monthNames[month]} ${year}
+              </div>
+              <button class="iconBtn" onclick="changeMonth(1)" style="background:var(--panel); border:1px solid var(--border); border-radius:8px;">▶</button>
+          </div>
+          <div style="overflow-x: auto; padding-bottom: 10px;">
+              <div style="min-width: ${minWidthStr}; display:grid; grid-template-columns:repeat(7, 1fr); gap:${gapStr};">
+      `;
+      
+      const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      days.forEach(d => html += `<div class="small muted" style="font-weight:600; text-align:center; margin-bottom:8px;">${d}</div>`);
+      
+      for(let i=0; i<firstDay; i++) {
+          html += `<div></div>`;
+      }
+      for(let i=1; i<=daysInMonth; i++) {
+          const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
+          const dayTasks = tasksByDate[dateStr] ? tasksByDate[dateStr] : [];
+          
+          const isTodayMarker = (isCurrentMonth && i === today) 
+              ? `border: 2px solid var(--accent); background: rgba(139,124,246,0.05);` 
+              : `border: 1px solid var(--border); background: var(--panel);`;
+          
+          let cellHtml = `<div style="min-height: ${cellMinHeight}; padding: 4px; border-radius: ${isMini ? '8px' : '12px'}; display: flex; flex-direction: column; gap: 2px; ${isTodayMarker}">`;
+          cellHtml += `<div style="font-size: 14px; font-weight: bold; margin-bottom: 2px; ${(isCurrentMonth && i === today) ? 'color: var(--accent);' : ''}">${i}</div>`;
+          
+          dayTasks.forEach(item => {
+              const color = item.type === 'priority' ? 'var(--danger)' : 'var(--text)';
+              const doneStyle = item.done ? 'text-decoration: line-through; opacity: 0.5;' : '';
+              cellHtml += `<div style="font-size: ${titleSize}; padding: 2px 4px; background: rgba(255,255,255,0.8); border-radius: 4px; border-left: 3px solid ${item.type==='priority'?'#ef6b7a':'#8b7cf6'}; color: ${color}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; ${doneStyle}" title="${escapeHtml(item.text)}">${escapeHtml(item.text)}</div>`;
+          });
+
+          cellHtml += `</div>`;
+          html += cellHtml;
+      }
+      html += `</div></div></div>`;
+      return html;
+    }
+
+    function getOverallTasksHTML() {
+      if(!state.weeks || state.weeks.length === 0) return '<div class="muted">No weeks or tasks available.</div>';
+      return state.weeks.map(w => {
+          const tasksHtml = (w.tasks ? w.tasks : []).map((t) => {
+              const dateBadge = t.date ? ` <span style="color:var(--accent); font-weight:bold;">[${t.date}]</span>` : '';
+              return `
+              <div class="taskItem" style="padding: 6px 10px; margin-bottom: 4px; ${t.done ? 'opacity: 0.6; text-decoration: line-through;' : ''}">
+                  <span style="font-size: 13px;">${escapeHtml(t.text)}${dateBadge}</span>
+              </div>
+          `}).join('');
+          
+          const prioritiesHtml = (w.priorities ? w.priorities : []).map(p => {
+              const pItem = typeof p === 'string' ? { text: p, done: false } : p;
+              const dateBadge = pItem.date ? ` <span style="color:var(--danger); font-weight:bold;">[${pItem.date}]</span>` : '';
+              return `
+              <div class="taskItem" style="padding: 6px 10px; margin-bottom: 4px; border-left: 3px solid var(--danger); ${pItem.done ? 'opacity: 0.6; text-decoration: line-through;' : ''}">
+                  <span style="font-size: 13px;">${escapeHtml(pItem.text)}${dateBadge}</span>
+              </div>
+          `}).join('');
+
+          if(!tasksHtml && !prioritiesHtml) return '';
+
+          return `
+              <div class="miniCard">
+                  <div class="cardHead"><strong>${escapeHtml(w.name)}</strong></div>
+                  <div style="margin-top: 8px;">
+                      ${prioritiesHtml}
+                      ${tasksHtml}
+                  </div>
+              </div>
+          `;
+      }).filter(Boolean).join('') || '<div class="muted">No tasks found across weeks.</div>';
+    }
+
+    function renderCalendarTab() {
+        const grid = document.getElementById('actualCalendarGrid');
+        if (grid) grid.innerHTML = generateActualCalendarHTML();
+        const container = document.getElementById('overallCalendarContainer');
+        if (container) container.innerHTML = getOverallTasksHTML();
+    }
+
+    function makeFloatingPanelDraggable(elmnt, header) {
+      let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+      header = header || elmnt;
+
+      header.addEventListener('mousedown', dragMouseDown);
+      header.addEventListener('touchstart', dragMouseDown, { passive: false });
+
+      function dragMouseDown(e) {
+        if(e.target.tagName === 'BUTTON') return;
+        if(e.cancelable) e.preventDefault();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        pos3 = clientX;
+        pos4 = clientY;
+        document.addEventListener('mouseup', closeDragElement);
+        document.addEventListener('mousemove', elementDrag);
+        document.addEventListener('touchend', closeDragElement);
+        document.addEventListener('touchmove', elementDrag, { passive: false });
+      }
+
+      function elementDrag(e) {
+        if(e.cancelable) e.preventDefault();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        pos1 = pos3 - clientX;
+        pos2 = pos4 - clientY;
+        pos3 = clientX;
+        pos4 = clientY;
+        elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
+        elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
+      }
+
+      function closeDragElement() {
+        document.removeEventListener('mouseup', closeDragElement);
+        document.removeEventListener('mousemove', elementDrag);
+        document.removeEventListener('touchend', closeDragElement);
+        document.removeEventListener('touchmove', elementDrag);
+      }
+    }
+
+    function activeTabFromHash(){
+      const hash = (location.hash || '#websitenotes').replace('#','');
+      if (hash.startsWith('week-')){
+        const id = hash.slice(5);
+        if (id) state.activeWeekId = id;
+        return 'week';
+      }
+      if (hash === 'websitenotes') return 'websitenotes';
+      if (hash === 'todo') return 'schedule';
+      if (hash === 'calendar') return 'calendar';
+      if (hash === 'notes') return 'notes';
+      if (hash === 'stickers') return 'stickers';
+      if (hash.startsWith('note-')) return 'noteEditor';
+      return ['schedule','calendar','achievements','characters','themes','stickers','settings','websitenotes'].includes(hash) ? hash : 'websitenotes';
+    }
+
+    function renderTab(){
+      if (state.activeTab === 'schedule') renderSchedule();
+      if (state.activeTab === 'calendar') renderCalendarTab();
+      if (state.activeTab === 'notes') renderNotes();
+      if (state.activeTab === 'noteEditor') renderNoteEditor();
+      if (state.activeTab === 'week') renderWeekPage();
+      if (state.activeTab === 'achievements') renderAchievements();
+      if (state.activeTab === 'characters') renderCharacters();
+      if (state.activeTab === 'themes') renderThemes();
+      if (state.activeTab === 'stickers') renderStickers();
+      if (state.activeTab === 'settings') renderSettings();
+    }
+
+    function renderAll(){
+      const tab = activeTabFromHash();
+      state.activeTab = tab;
+
+      const week = currentWeek();
+      const titleMap = {
+        websitenotes: ['Website Notes', 'Welcome to ToDimension. Read the configuration tips here.'],
+        schedule: ['To-do List', 'Create weeks, track progress, and have your favorite characters cheer you on.'],
+        calendar: ['Overall Calendar', 'All your big picture tasks assigned across the weeks.'],
+        notes: ['Notes', 'Create notes for your subjects or extra information.'],
+        noteEditor: ['Notes', 'Write, style, and save notes.'],
+        achievements: ['Achievements', 'XP, levels, and goal progress.'],
+        characters: ['Characters', 'Add sprites, voice lines, bubbles, and animations.'],
+        themes: ['Themes', 'Create different worlds to be in.'],
+        stickers: ['Stickers', 'Upload and place your own stickers.'],
+        settings: ['Settings', 'Profile and colors.']
+      };
+
+      if (tab === 'week'){
+        const heroTitle = document.getElementById('heroTitle');
+        const heroText = document.getElementById('heroText');
+        if(heroTitle) heroTitle.textContent = week ? week.name : 'Week';
+        if(heroText) heroText.textContent = week
+          ? 'Your assigned character is here for this week.'
+          : 'Pick or create a week.';
+      }else{
+        const heroTitle = document.getElementById('heroTitle');
+        const heroText = document.getElementById('heroText');
+        if(heroTitle) heroTitle.textContent = titleMap[tab][0];
+        if(heroText) heroText.textContent = titleMap[tab][1];
+      }
+
+      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+      const activeView = document.getElementById(tab + 'View');
+      if(activeView) activeView.classList.add('active');
+
+      document.querySelectorAll('.nav a').forEach(a => {
+        a.classList.toggle('active', a.dataset.tab === tab);
+      });
+
+      if (tab !== 'week') stopCurrentVoice();
+      applyAppearance();
+      renderSidebar();
+      renderTab();
+      resizeConfettiCanvas();
+    }
+
+    function updateFormatIndicators() {
+      if (state.activeTab !== 'noteEditor') return;
+      ['bold', 'italic', 'underline'].forEach(cmd => {
+        const btn = document.querySelector(`.docIconBtn[data-cmd="${cmd}"]`);
+        if (btn) {
+          btn.classList.toggle('active', document.queryCommandState(cmd));
+        }
+      });
+    }
+
+    function setupExtras(){
+      const titleInput = document.getElementById('noteTitleInput');
+      const editor = document.getElementById('noteContentEditor');
+      const noteGroupSelect = document.getElementById('noteGroupCharacterSelect');
+
+      let autosaveTimer = null;
+      const queueSave = (skipRender = false) => {
+        clearTimeout(autosaveTimer);
+        autosaveTimer = setTimeout(() => saveNote(skipRender), 180);
+      };
+
+      if(titleInput) titleInput.addEventListener('input', () => queueSave(true));
+      if(editor) {
+          editor.addEventListener('input', () => {
+              lastActionType = 'text';
+              queueSave(true);
+          });
+          editor.addEventListener('blur', () => saveNote(true));
+      }
+      if(titleInput) titleInput.addEventListener('blur', () => saveNote(true));
+      
+      if(noteGroupSelect) {
+          noteGroupSelect.addEventListener('change', () => {
+            saveNoteGroup();
+            const group = currentNoteGroup();
+            if (group) renderNoteCompanion(group);
+          });
+      }
+
+      const toggleBookBtn = document.getElementById('toggleStickerBookBtn');
+      if(toggleBookBtn) {
+          toggleBookBtn.addEventListener('click', () => {
+            const floatBook = document.getElementById('floatingStickerBook');
+            if(floatBook) floatBook.classList.toggle('show');
+            renderStickers();
+          });
+      }
+
+      let bgEditMode = false;
+      const bgToggleBtn = document.getElementById('bgEditToggleBtn');
+      if(bgToggleBtn) {
+          bgToggleBtn.addEventListener('click', (e) => {
+              bgEditMode = !bgEditMode;
+              const wrapper = document.querySelector('.docsPageWrapper');
+              if (bgEditMode) {
+                  wrapper.classList.add('bg-edit-mode');
+                  bgToggleBtn.style.background = 'var(--accent)';
+                  bgToggleBtn.style.color = '#fff';
+                  bgToggleBtn.textContent = 'Lock Background';
+              } else {
+                  wrapper.classList.remove('bg-edit-mode');
+                  bgToggleBtn.style.background = 'transparent';
+                  bgToggleBtn.style.color = 'var(--text)';
+                  bgToggleBtn.textContent = 'Unlock Background';
+              }
+          });
+      }
+
+      const floatBook = document.getElementById('floatingStickerBook');
+      const header = document.getElementById('stickerBookHeader');
+      if(floatBook && header) {
+          makeFloatingPanelDraggable(floatBook, header);
+      }
+
+      const floatCal = document.getElementById('weekFloatingCalendar');
+      if(floatCal) {
+          makeFloatingPanelDraggable(floatCal, document.getElementById('weekFloatingCalendarHeader'));
+      }
+
+      const importBtn = document.getElementById('importStickerBtn');
+      if(importBtn) importBtn.addEventListener('click', importStickers);
+      
+      const clearBtn = document.getElementById('clearStickerBtn');
+      if(clearBtn) {
+          clearBtn.addEventListener('click', () => {
+            if (!confirm('Clear all stickers?')) return;
+            state.stickers = [];
+            save(true);
+            renderStickers();
+          });
+      }
+
+      const highlightBtn = document.getElementById('clearHighlightBtn');
+      if(highlightBtn) {
+          highlightBtn.addEventListener('click', () => {
+            document.execCommand('backColor', false, 'transparent');
+            saveNote(true);
+          });
+      }
+
+      const moveUpBtn = document.getElementById('moveTextUpBtn');
+      if(moveUpBtn) moveUpBtn.addEventListener('click', () => moveSelectedText(-1));
+      
+      const moveDownBtn = document.getElementById('moveTextDownBtn');
+      if(moveDownBtn) moveDownBtn.addEventListener('click', () => moveSelectedText(1));
+
+      // NEW MATH BUTTON HANDLER
+      const mathBtn = document.getElementById('insertMathBtn');
+      if(mathBtn) {
+          mathBtn.addEventListener('click', (e) => {
+              e.preventDefault();
+              const editor = document.getElementById('noteContentEditor');
+              editor.focus();
+              
+              const mfSpan = document.createElement('span');
+              mfSpan.contentEditable = "false";
+              mfSpan.className = "math-wrapper";
+              mfSpan.style.display = "inline-block";
+              mfSpan.style.margin = "0 4px";
+              mfSpan.style.verticalAlign = "middle";
+              mfSpan.innerHTML = `<math-field class="docs-equation" math-virtual-keyboard-policy="none"></math-field>`;
+
+              const sel = window.getSelection();
+              if(sel.rangeCount > 0) {
+                  const range = sel.getRangeAt(0);
+                  if(editor.contains(range.commonAncestorContainer)) {
+                      range.insertNode(mfSpan);
+                      const zws = document.createTextNode('\u200B'); // Zero-width space to place cursor after
+                      range.insertNode(zws);
+                      range.collapse(false);
+                  } else {
+                      editor.appendChild(mfSpan);
+                  }
+              } else {
+                  editor.appendChild(mfSpan);
+              }
+
+              const mf = mfSpan.querySelector('math-field');
+              if(mf) {
+                  window.lastFocusedMathField = mf;
+                  document.getElementById('mathToolbar').style.display = 'flex';
+                  mf.focus();
+
+                  mf.addEventListener('input', () => {
+                      saveNote(true);
+                  });
+
+                  // Fix deletion issue
+                  mf.addEventListener('keydown', (evt) => {
+                      if (evt.key === 'Backspace' && mf.value === '') {
+                          evt.preventDefault();
+                          mfSpan.remove();
+                          editor.focus();
+                          document.getElementById('mathToolbar').style.display = 'none';
+                          saveNote(true);
+                      }
+                  });
+
+                  mf.addEventListener('focus', () => {
+                      window.lastFocusedMathField = mf;
+                      document.getElementById('mathToolbar').style.display = 'flex';
+                  });
+              }
+              saveNote(true);
+          });
+      }
+
+      const closeMathBtn = document.getElementById('closeMathToolbarBtn');
+      if (closeMathBtn) {
+          closeMathBtn.addEventListener('click', (e) => {
+              e.preventDefault();
+              document.getElementById('mathToolbar').style.display = 'none';
+          });
+      }
+
+      const clearTextBtn = document.getElementById('clearAllTextBtn');
+      if(clearTextBtn) {
+          clearTextBtn.addEventListener('click', () => {
+            if (confirm("Are you sure you want to clear all text? Can be undone.")) {
+              const editor = document.getElementById('noteContentEditor');
+              if (editor) {
+                editor.focus();
+                document.execCommand('selectAll', false, null);
+                document.execCommand('delete', false, null);
+                saveNote(true);
+              }
+            }
+          });
+      }
+
+      // Keyboard Undo support linked seamlessly to stickers
+      document.addEventListener('keydown', e => {
+          if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
+              if (lastActionType === 'sticker' && stickerHistory.length > 0) {
+                  e.preventDefault();
+                  activeStickers = JSON.parse(stickerHistory.pop());
+                  renderNoteStickers();
+                  saveNote(true);
+                  if (stickerHistory.length === 0) lastActionType = 'text';
+              }
+          }
+      });
+
+      renderStickers();
+    }
+
+    function init(){
+      if (!state.activeWeekId && state.weeks[0]) state.activeWeekId = state.weeks[0].id;
+      if (!state.activeCharacterId && state.characters[0]) state.activeCharacterId = state.characters[0].id;
+      if (!state.activeThemeId && state.themes[0]) state.activeThemeId = state.themes[0].id;
+ 
+      const bindClick = (id, fn) => {
+        const el = document.getElementById(id);
+        if (el) el.onclick = fn;
+      };
+      const bindChange = (id, fn) => {
+        const el = document.getElementById(id);
+        if (el) el.onchange = fn;
+      };
+      const bindKeydown = (id, fn) => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('keydown', fn);
+      };
+ 
+      document.querySelectorAll('button').forEach(btn => btn.type = 'button');
+      wireLivePreviews();
+ 
+      bindClick('saveAllBtn', () => save());
+ 
+      const navLinks = document.querySelectorAll('.nav a');
+      if (navLinks.length){
+        navLinks.forEach(a => {
+          a.addEventListener('click', e => {
+            e.preventDefault();
+            const target = a.dataset.tab;
+            if (!target) return;
+            navigateTo(target, `#${target}`);
+          });
+        });
+      }
+ 
+      bindClick('addWeekBtn', addWeek);
+      bindClick('saveWeekBtn', saveWeek);
+      bindClick('deleteWeekBtn', () => { const w = currentWeek(); if (w) deleteWeek(w.id); });
+      bindClick('addWeekTaskBtn', addWeekTask);
+      bindKeydown('newWeekTaskInput', e => { if (e.key === 'Enter') addWeekTask(); });
+ 
+      bindClick('backToScheduleBtn', goToToDoList);
+      bindClick('deleteWeekPageBtn', () => { const w = currentWeek(); if (w) deleteWeek(w.id); });
+      bindClick('addWeekTaskBtnPage', addWeekTask);
+      bindKeydown('newWeekTaskInputPage', e => { if (e.key === 'Enter') addWeekTask(); });
+      bindClick('addWeekPriorityBtnPage', addWeekPriority);
+      bindKeydown('newWeekPriorityInputPage', e => { if (e.key === 'Enter') addWeekPriority(); });
+
+      bindClick('addNoteGroupBtn', addNoteGroup);
+      bindClick('saveNoteGroupBtn', saveNoteGroup);
+      bindClick('deleteNoteGroupBtn', () => {
+        const g = currentNoteGroup();
+        if (g) deleteNoteGroup(g.id);
+      });
+
+      bindClick('backToNotesBtn', () => navigateTo('notes', '#notes'));
+      bindClick('addNoteBtn', addNote);
+      bindClick('saveNoteBtn', () => saveNote(false));
+      bindClick('deleteNoteBtn', deleteNote);
+      bindChange('noteTitleInput', () => saveNote(true));
+      bindChange('noteGroupCharacterSelect', saveNoteGroup);
+
+      bindChange('pageSelect', (e) => {
+        selectNote(e.target.value);
+      });
+
+      bindChange('noteFontSelect', () => {
+        const el = document.getElementById('noteFontSelect');
+        if(el) formatNote('fontName', el.value);
+      });
+      bindChange('noteSizeSelect', () => {
+        const el = document.getElementById('noteSizeSelect');
+        if(el) formatNote('fontSize', el.value);
+      });
+      bindChange('noteTextColorInput', () => {
+        const el = document.getElementById('noteTextColorInput');
+        if(el) formatNote('foreColor', el.value);
+      });
+      bindChange('noteHighlightInput', () => {
+        const el = document.getElementById('noteHighlightInput');
+        if(el) formatNote('hiliteColor', el.value);
+      });
+
+      document.querySelectorAll('.docIconBtn[data-cmd]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+           e.preventDefault();
+           if (btn.dataset.cmd === 'undo') {
+               if (lastActionType === 'sticker' && stickerHistory.length > 0) {
+                   activeStickers = JSON.parse(stickerHistory.pop());
+                   renderNoteStickers();
+                   saveNote(true);
+                   if (stickerHistory.length === 0) lastActionType = 'text';
+                   return;
+               }
+           }
+           formatNote(btn.dataset.cmd);
+        });
+      });
+
+      bindClick('noteLinkBtn', () => {
+        const url = prompt('Link URL');
+        if (url) formatNote('createLink', url);
+      });
+
+      bindClick('addCharacterBtn', () => { navigateTo('characters', '#characters'); state.activeCharacterId = ''; fillCharacterForm(null); renderCharacterPreview(); });
+      bindClick('saveCharacterBtn', async () => {
+        await saveCharacter();
+        navigateTo('characters', '#characters');
+      });
+      bindClick('clearCharacterBtn', () => { state.activeCharacterId = ''; renderAll(); });
+      bindClick('deleteCharacterBtn', () => { const c = currentCharacter(); if (c) deleteCharacter(c.id); });
+ 
+      bindClick('addThemeBtn', () => { state.activeThemeId = ''; fillThemeForm(null); });
+      bindClick('saveThemeBtn', saveTheme);
+      bindClick('applyThemeBtn', () => { const t = currentTheme(); if (t) applyTheme(t.id); });
+      bindClick('clearThemeBtn', () => { state.activeThemeId = ''; renderAll(); });
+      bindClick('deleteThemeBtn', () => { const t = currentTheme(); if (t) deleteTheme(t.id); });
+ 
+      bindClick('saveSettingsBtn', saveSettings);
+      bindClick('saveAppearanceBtn', saveAppearance);
+      bindChange('modeInput', saveAppearance);
+      bindChange('accentHexInput', saveAppearance);
+
+      bindClick('resetXpBtn', async () => {
+        if (!confirm('Are you sure you want to completely reset all XP and Stats? This cannot be undone.')) return;
+        state.stats = { totalXP:0, tasksCompleted:0, weeksCompleted:0 };
+        state.weeks.forEach(w => {
+          w.xp = 0;
+          w.weekBonusAwarded = false;
+          if (Array.isArray(w.tasks)) {
+            w.tasks.forEach(t => { t.done = false; t.xpAwarded = false; });
+          }
+          if (Array.isArray(w.priorities)) {
+            w.priorities.forEach(p => { p.done = false; p.xpAwarded = false; });
+          }
+        });
+        await save(false);
+        renderAll();
+      });
+ 
+      bindChange('weekCharacterSelect', saveWeek);
+      bindChange('weekNameInput', saveWeek);
+      
+      const charSel = document.getElementById('weekPageCharacterSelect');
+      const nameInp = document.getElementById('weekPageNameInput');
+      if(charSel) charSel.addEventListener('change', saveWeek);
+      if(nameInp) nameInp.addEventListener('change', saveWeek);
+ 
+      window.openWeek = openWeek;
+      window.renameWeek = renameWeek;
+      window.deleteWeek = deleteWeek;
+      window.toggleWeekTask = toggleWeekTask;
+      window.removeWeekTask = removeWeekTask;
+      window.openNoteGroup = openNoteGroup;
+      window.deleteNoteGroup = deleteNoteGroup;
+      window.selectNote = selectNote;
+      window.editCharacter = editCharacter;
+      window.deleteCharacter = deleteCharacter;
+      window.editTheme = editTheme;
+      window.applyTheme = applyTheme;
+      window.deleteTheme = deleteTheme;
+      window.setAccent = setAccent;
+      
+      window.addEventListener('hashchange', renderAll);
+      
+      window.addEventListener('resize', () => {
+        applyAppearance();
+        resizeConfettiCanvas();
+      });
+ 
+      resizeConfettiCanvas();
+    }
+ 
+    loadData().then(() => {
+        setupExtras();
+        init();
+    });
+  </script>
+</body>
+</html>
