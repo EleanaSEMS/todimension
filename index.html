@@ -414,7 +414,7 @@
     }
  
     .bubble{
-      align-self:flex-end !important; /* Fixed: forced to very right */
+      align-self:flex-end !important;
       max-width:100%;
       padding:12px 14px;
       border-radius:18px 18px 18px 6px;
@@ -491,7 +491,6 @@
       pointer-events:none;
     }
  
-    /* Stacks bubble STRUCTURALLY above the image instead of overlapping it */
     #weekView #weekPageCharacterBubble,
     #noteEditorView #notePageCharacterBubble{
       position:relative;
@@ -501,7 +500,7 @@
       border:2px solid var(--accent);
       box-shadow:0 6px 16px rgba(0,0,0,0.12);
       opacity:1 !important;
-      margin: 0 0 0 auto !important; /* Force completely right */
+      margin: 0 0 0 auto !important;
       padding:12px 14px;
       border-radius:24px;
       color:var(--text);
@@ -587,7 +586,6 @@
       z-index:1000;
     }
 
-    /* Keep tabs beside the main screen on all devices */
     @media (max-width: 1024px) {
         .app { grid-template-columns: 220px 1fr; }
     }
@@ -817,9 +815,6 @@
   margin:0 4px !important;
 }
 
-/* ========================================================
-   GOOGLE DOCS EQUATION TOOLBAR (NEW)
-   ======================================================== */
 .docsMathToolbar {
     width: 100%;
     min-height: 36px;
@@ -886,7 +881,6 @@
     border-color: #dadce0;
 }
 
-/* Aggressively disable MathLive Keyboard & Styling */
 math-field.docs-equation {
     min-width: 25px;
     padding: 2px 4px;
@@ -899,15 +893,29 @@ math-field.docs-equation {
     vertical-align: middle;
 }
 math-field.docs-equation:focus-within {
-    border: 1px solid #1a73e8 !important; /* Google Docs Blue */
+    border: 1px solid #1a73e8 !important;
     background: #f8fafd !important;
     box-shadow: 0 0 0 2px rgba(26,115,232,0.2);
 }
-math-field::part(virtual-keyboard-toggle) {
-    display: none !important;
+
+/* ========================================================
+   MATHLIVE ICON HIDING LOGIC (NEW)
+   ======================================================== */
+/* Permanently hide the 3-line menu toggle */
+math-field::part(menu-toggle) { 
+    display: none !important; 
 }
-math-field::part(menu-toggle) {
-    display: none !important;
+
+/* Hide the keyboard button whenever the equation is NOT focused */
+math-field:not(:focus-within)::part(virtual-keyboard-toggle) { 
+    display: none !important; 
+}
+
+/* Keep the keyboard button completely hidden on computers (since they have physical keyboards) */
+@media (hover: hover) and (pointer: fine) {
+    math-field::part(virtual-keyboard-toggle) { 
+        display: none !important; 
+    }
 }
 /* ======================================================== */
 
@@ -1214,8 +1222,8 @@ math-field::part(menu-toggle) {
         <div class="panel" style="line-height: 1.8; font-size: 15px; padding: 24px;">
           <h3 style="margin-top: 0; font-size: 22px; color: var(--accent);">Hello! Welcome to my website, ToDimension.</h3>
           <p>Since this website is still in beta, I'd like to explain a few things I wasn't exactly able to fix so easily, so you'll have to bear with me.</p>
-          <p><strong>First, compatibility.</strong> Noott exactly compatible with devices without a mouse and keyboard... will fix that soon! [By soon.. I mean by when someone really asks for it..]</p>
-          <p><strong>For the stickers,</strong> when you open the sticker book in the notes, you'll see this "Unlock background" feature. This allows you to move stickers that you have put behind the text in your notebook. To be able to add text to your notebook again, you simply lock the background.</p>
+          <p><strong>First, the stickers.</strong> When you place them in the notes, they're a little hard to rotate. I suggest you aim for just at the top of the sticker (Especially if you're on a computer) and you'll see it grab. That's when you rotate.</p>
+          <p><strong>Again for the stickers,</strong> when you open the sticker book in the notes, you'll see this "Unlock background" feature. This allows you to move stickers that you have put behind the text in your notebook. To be able to add text to your notebook again, you simply lock the background.</p>
           <p><strong>In the notes,</strong> the broom emoji beside the highlight just means it removes the highlighter on your text.</p>
           <p><strong>Only saves per browser.</strong> I haven't added a sign in feature yet, but soon I will. For now, your progress only saves to your browser. It won't save anywhere else. Please let me know if you have any problems with this.</p>
           <p style="color: var(--danger); font-weight: bold;">DO NOT FORGET to save your notes! If you exit without saving, well.. it won't save.</p>
@@ -1305,11 +1313,11 @@ math-field::part(menu-toggle) {
                 </div>
                 <div class="task-input-row">
                   <input class="input" id="newWeekTaskInputPage" placeholder="Add a task">
-                  <div style="position:relative; width:45px; height:45px; flex-shrink:0;">
-                    <input class="input" type="date" id="newWeekTaskDatePage" title="Due Date" style="position:absolute; inset:0; opacity:0; z-index:2; cursor:pointer;">
-                    <div class="btn secondary" style="position:absolute; inset:0; display:grid; place-items:center; z-index:1; font-size:18px; padding:0; margin:0;">📅</div>
+                  <div style="position:relative; width:45px; height:45px; flex-shrink:0; overflow:hidden; border-radius:14px;">
+                    <input class="input" type="date" id="newWeekTaskDatePage" title="Due Date" style="position:absolute; width:100%; height:100%; inset:0; opacity:0; z-index:2; cursor:pointer; padding:0; margin:0; box-sizing:border-box;">
+                    <div class="btn secondary" style="position:absolute; inset:0; display:grid; place-items:center; z-index:1; font-size:18px; padding:0; margin:0; pointer-events:none;">📅</div>
                   </div>
-                  <button class="btn" id="addWeekTaskBtnPage">Add</button>
+                  <button class="btn" id="addWeekTaskBtnPage" style="position:relative; z-index:5;">Add</button>
                 </div>
                 <div class="taskList" id="weekPageTasksList"></div>
               </div>
@@ -1319,11 +1327,11 @@ math-field::part(menu-toggle) {
                 </div>
                 <div class="task-input-row">
                   <input class="input" id="newWeekPriorityInputPage" placeholder="Add a priority">
-                  <div style="position:relative; width:45px; height:45px; flex-shrink:0;">
-                    <input class="input" type="date" id="newWeekPriorityDatePage" title="Due Date" style="position:absolute; inset:0; opacity:0; z-index:2; cursor:pointer;">
-                    <div class="btn secondary" style="position:absolute; inset:0; display:grid; place-items:center; z-index:1; font-size:18px; padding:0; margin:0;">📅</div>
+                  <div style="position:relative; width:45px; height:45px; flex-shrink:0; overflow:hidden; border-radius:14px;">
+                    <input class="input" type="date" id="newWeekPriorityDatePage" title="Due Date" style="position:absolute; width:100%; height:100%; inset:0; opacity:0; z-index:2; cursor:pointer; padding:0; margin:0; box-sizing:border-box;">
+                    <div class="btn secondary" style="position:absolute; inset:0; display:grid; place-items:center; z-index:1; font-size:18px; padding:0; margin:0; pointer-events:none;">📅</div>
                   </div>
-                  <button class="btn" id="addWeekPriorityBtnPage">Add</button>
+                  <button class="btn" id="addWeekPriorityBtnPage" style="position:relative; z-index:5;">Add</button>
                 </div>
                 <div class="taskList" id="weekPagePriorityList"></div>
               </div>
@@ -1474,7 +1482,6 @@ math-field::part(menu-toggle) {
       <button class="docIconBtn" id="clearAllTextBtn" style="color: var(--danger) !important; font-weight: bold;" title="Clear All Text">Clear</button>
     </div>
 
-    <!-- GOOGLE DOCS EQUATION TOOLBAR (Dynamically hidden/shown) -->
     <div class="docsMathToolbar" id="mathToolbar" style="display: none;">
       <div class="math-dropdown">
         <button class="math-dropbtn" title="Greek letters">αβΔ ▾</button>
@@ -1750,7 +1757,7 @@ math-field::part(menu-toggle) {
           <div class="panel">
             <div class="sectionTitle">
               <h3>Appearance</h3>
-              <span class="muted">Soft colors, your choice</span>
+              <span class="muted">Pick a color or insert your own.</span>
             </div>
  
             <div class="small">Choose a color</div>
@@ -3118,7 +3125,13 @@ function renderWeekPage(){
       if (editor && document.activeElement !== editor) {
          editor.innerHTML = note.content || '';
          // Re-attach listeners to existing math fields inside content
+         
+         const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+
          editor.querySelectorAll('math-field').forEach(mf => {
+             // Mobile Virtual Keyboard Smart Toggle
+             mf.setAttribute('math-virtual-keyboard-policy', isTouchDevice ? "auto" : "none");
+
              mf.addEventListener('focus', () => {
                  window.lastFocusedMathField = mf;
                  document.getElementById('mathToolbar').style.display = 'flex';
@@ -3719,21 +3732,26 @@ async function saveCharacter(){
                 return; 
             }
             
-            // Mark as globally selected sticker
             window.selectedStickerId = sticker.id;
-            document.querySelectorAll('.custom-sticker').forEach(elem => elem.classList.remove('selected-sticker'));
+            
+            // Bring to front visually without breaking DOM structure
+            document.querySelectorAll('.custom-sticker').forEach(elem => {
+                elem.classList.remove('selected-sticker');
+                const sData = activeStickers.find(s => s.id === elem.id.replace('sticker-', ''));
+                if(sData) {
+                    elem.style.zIndex = sData.behindText ? 5 : 15;
+                }
+            });
             el.classList.add('selected-sticker');
+            el.style.zIndex = sticker.behindText ? 6 : 100;
 
             pushStickerHistory();
 
+            // Update underlying data order but do NOT call renderNoteStickers()
             activeStickers = activeStickers.filter(s => s.id !== sticker.id);
             activeStickers.push(sticker);
-            renderNoteStickers();
 
-            const sEl = document.getElementById('sticker-'+sticker.id);
-            if(!sEl) return;
-
-            const rect = sEl.getBoundingClientRect();
+            const rect = el.getBoundingClientRect();
             stickerStartData = {
                 x: sticker.x, y: sticker.y, 
                 w: sticker.w, h: sticker.h, 
@@ -3746,7 +3764,7 @@ async function saveCharacter(){
             dragStartY = e.clientY;
             currentDragSticker = sticker;
 
-            sEl.classList.add('is-dragging');
+            el.classList.add('is-dragging');
             document.body.style.userSelect = 'none';
 
             if (e.target.classList.contains('resize-handle')) {
@@ -3766,33 +3784,40 @@ async function saveCharacter(){
             if(e.target.classList.contains('delete-handle')) return; 
             if (e.touches.length > 1) return;
             
-            e.preventDefault(); // FIX: Stops native scroll and long-press right click on mobile!
+            e.preventDefault();
+            e.stopPropagation();
+            
             const touch = e.touches[0];
             
-            // Mark as globally selected sticker
             window.selectedStickerId = sticker.id;
-            document.querySelectorAll('.custom-sticker').forEach(elem => elem.classList.remove('selected-sticker'));
+            
+            // Bring to front visually without breaking DOM structure
+            document.querySelectorAll('.custom-sticker').forEach(elem => {
+                elem.classList.remove('selected-sticker');
+                const sData = activeStickers.find(s => s.id === elem.id.replace('sticker-', ''));
+                if(sData) {
+                    elem.style.zIndex = sData.behindText ? 5 : 15;
+                }
+            });
             el.classList.add('selected-sticker');
+            el.style.zIndex = sticker.behindText ? 6 : 100;
 
             clearTimeout(stickerLongPressTimer);
             stickerLongPressTimer = setTimeout(() => {
-                if (currentDragAction) return; // FIX: Don't show menu if already dragging
+                if (currentDragAction) return; 
                 showStickerContextMenu(touch, sticker);
                 currentDragSticker = null;
                 el.classList.remove('is-dragging');
                 document.body.style.userSelect = '';
-            }, 800); // FIX: Extended so it doesn't accidentally trigger while preparing to drag
+            }, 800);
 
             pushStickerHistory();
 
+            // Update data but DO NOT render! (Fixes the mobile tap glitch)
             activeStickers = activeStickers.filter(s => s.id !== sticker.id);
             activeStickers.push(sticker);
-            renderNoteStickers();
 
-            const sEl = document.getElementById('sticker-'+sticker.id);
-            if(!sEl) return;
-
-            const rect = sEl.getBoundingClientRect();
+            const rect = el.getBoundingClientRect();
             stickerStartData = {
                 x: sticker.x, y: sticker.y, 
                 w: sticker.w, h: sticker.h, 
@@ -3805,7 +3830,7 @@ async function saveCharacter(){
             dragStartY = touch.clientY;
             currentDragSticker = sticker;
 
-            sEl.classList.add('is-dragging');
+            el.classList.add('is-dragging');
             document.body.style.userSelect = 'none';
 
             if (e.target.classList.contains('resize-handle')) {
@@ -3816,11 +3841,10 @@ async function saveCharacter(){
             } else {
                 currentDragAction = 'move';
             }
-            e.stopPropagation();
         }, { passive: false });
         
         el.addEventListener('contextmenu', (e) => {
-            e.preventDefault(); // FIX: disables standard browser right click
+            e.preventDefault(); 
             showStickerContextMenu(e, sticker);
         });
     }
@@ -3844,7 +3868,16 @@ async function saveCharacter(){
             const angle = Math.atan2(e.clientY - stickerStartData.cy, e.clientX - stickerStartData.cx) * 180 / Math.PI;
             s.rot = stickerStartData.rot + (angle - stickerStartData.startAngle);
         }
-        renderNoteStickers();
+
+        // Extremely fast visual update without breaking DOM
+        const sEl = document.getElementById('sticker-'+s.id);
+        if(sEl) {
+            sEl.style.left = s.x + 'px';
+            sEl.style.top = s.y + 'px';
+            sEl.style.width = s.w + 'px';
+            sEl.style.height = s.h + 'px';
+            sEl.style.transform = `rotate(${s.rot || 0}deg)`;
+        }
     });
 
     document.addEventListener('touchmove', e => {
@@ -3876,13 +3909,25 @@ async function saveCharacter(){
             const angle = Math.atan2(touch.clientY - stickerStartData.cy, touch.clientX - stickerStartData.cx) * 180 / Math.PI;
             s.rot = stickerStartData.rot + (angle - stickerStartData.startAngle);
         }
-        renderNoteStickers();
+
+        // Extremely fast visual update without breaking DOM
+        const sEl = document.getElementById('sticker-'+s.id);
+        if(sEl) {
+            sEl.style.left = s.x + 'px';
+            sEl.style.top = s.y + 'px';
+            sEl.style.width = s.w + 'px';
+            sEl.style.height = s.h + 'px';
+            sEl.style.transform = `rotate(${s.rot || 0}deg)`;
+        }
     }, { passive: false });
 
     document.addEventListener('mouseup', () => {
         if (currentDragSticker) {
             const sEl = document.getElementById('sticker-'+currentDragSticker.id);
-            if(sEl) sEl.classList.remove('is-dragging');
+            if(sEl) {
+                sEl.classList.remove('is-dragging');
+                sEl.style.zIndex = currentDragSticker.behindText ? 5 : 15;
+            }
             document.body.style.userSelect = '';
             
             currentDragSticker = null;
@@ -3895,7 +3940,10 @@ async function saveCharacter(){
         clearTimeout(stickerLongPressTimer);
         if (currentDragSticker) {
             const sEl = document.getElementById('sticker-'+currentDragSticker.id);
-            if(sEl) sEl.classList.remove('is-dragging');
+            if(sEl) {
+                sEl.classList.remove('is-dragging');
+                sEl.style.zIndex = currentDragSticker.behindText ? 5 : 15;
+            }
             document.body.style.userSelect = '';
             
             currentDragSticker = null;
@@ -3907,14 +3955,22 @@ async function saveCharacter(){
     // Global deselect click handlers
     document.addEventListener('mousedown', e => {
         if (!e.target.closest('.custom-sticker') && !e.target.closest('#floatingStickerBook') && !e.target.closest('#stickerContextMenu') && !e.target.closest('.docsToolbar') && !e.target.closest('.docsMenuBar')) {
-            document.querySelectorAll('.custom-sticker').forEach(el => el.classList.remove('selected-sticker'));
+            document.querySelectorAll('.custom-sticker').forEach(el => {
+                el.classList.remove('selected-sticker');
+                const sData = activeStickers.find(s => s.id === el.id.replace('sticker-', ''));
+                if(sData) el.style.zIndex = sData.behindText ? 5 : 15;
+            });
             window.selectedStickerId = null;
         }
     });
 
     document.addEventListener('touchstart', e => {
         if (!e.target.closest('.custom-sticker') && !e.target.closest('#floatingStickerBook') && !e.target.closest('#stickerContextMenu') && !e.target.closest('.docsToolbar') && !e.target.closest('.docsMenuBar')) {
-            document.querySelectorAll('.custom-sticker').forEach(el => el.classList.remove('selected-sticker'));
+            document.querySelectorAll('.custom-sticker').forEach(el => {
+                el.classList.remove('selected-sticker');
+                const sData = activeStickers.find(s => s.id === el.id.replace('sticker-', ''));
+                if(sData) el.style.zIndex = sData.behindText ? 5 : 15;
+            });
             window.selectedStickerId = null;
         }
     });
@@ -4426,7 +4482,6 @@ async function saveCharacter(){
       const moveDownBtn = document.getElementById('moveTextDownBtn');
       if(moveDownBtn) moveDownBtn.addEventListener('click', () => moveSelectedText(1));
 
-      // NEW MATH BUTTON HANDLER
       const mathBtn = document.getElementById('insertMathBtn');
       if(mathBtn) {
           mathBtn.addEventListener('click', (e) => {
@@ -4440,14 +4495,19 @@ async function saveCharacter(){
               mfSpan.style.display = "inline-block";
               mfSpan.style.margin = "0 4px";
               mfSpan.style.verticalAlign = "middle";
-              mfSpan.innerHTML = `<math-field class="docs-equation" math-virtual-keyboard-policy="none"></math-field>`;
+
+              // Smart logic: Auto detect if user is on mobile/tablet to allow keyboard popup
+              const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+              const kbPolicy = isTouchDevice ? "auto" : "none";
+
+              mfSpan.innerHTML = `<math-field class="docs-equation" math-virtual-keyboard-policy="${kbPolicy}"></math-field>`;
 
               const sel = window.getSelection();
               if(sel.rangeCount > 0) {
                   const range = sel.getRangeAt(0);
                   if(editor.contains(range.commonAncestorContainer)) {
                       range.insertNode(mfSpan);
-                      const zws = document.createTextNode('\u200B'); // Zero-width space to place cursor after
+                      const zws = document.createTextNode('\u200B'); 
                       range.insertNode(zws);
                       range.collapse(false);
                   } else {
@@ -4467,7 +4527,6 @@ async function saveCharacter(){
                       saveNote(true);
                   });
 
-                  // Fix deletion issue
                   mf.addEventListener('keydown', (evt) => {
                       if (evt.key === 'Backspace' && mf.value === '') {
                           evt.preventDefault();
@@ -4510,7 +4569,6 @@ async function saveCharacter(){
           });
       }
 
-      // Keyboard Undo support linked seamlessly to stickers
       document.addEventListener('keydown', e => {
           if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
               if (lastActionType === 'sticker' && stickerHistory.length > 0) {
